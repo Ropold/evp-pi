@@ -175,3 +175,4 @@ evp-pi/
 - Neuer Ordner `data/` für die Aufgaben-JSON.
 - `utils/` hat Unterordner (`commands/`, `filesystem/`), weil es sonst über 30 Dateien in einem Ordner wären.
 - Backend bleibt minimal: keine Controller, Services oder Repositories, solange es keine Datenbank gibt.
+- .
