@@ -40,7 +40,7 @@ Ich würde die Konsole **simulieren**, nicht an ein echtes Linux anbinden.
 
 ## Speicherung der Kannliste und Aufgaben
 - Alles läuft **nur im Frontend**, ohne Datenbank und ohne API.
-- Die Aufgaben liegen als `aufgaben.json` im Frontend (`frontend/src/data/`) und werden direkt importiert.
+- Die Aufgaben liegen als `tasks.json` im Frontend (`frontend/src/data/`) und werden direkt importiert.
 - Jede Aufgabe enthält Kategorie, Ausgangszustand, Aufgabentext, Tipps, Lösungen und Prüfregel. Eine Schwierigkeit steht **nicht** in der JSON.
 - Die JSON-Datei ist **nur Inhalt** und wird zur Laufzeit nie verändert.
 - Deine Bewertungen und den Lernfortschritt speichert der Browser getrennt in `localStorage`, z. B. `{ "chmod-01": { "bewertung": "schwer", "faellig": "2026-11-06" } }`.
@@ -50,7 +50,7 @@ Ich würde die Konsole **simulieren**, nicht an ein echtes Linux anbinden.
 - Es bekommt erst Aufgaben, wenn Benutzerkonten, zentral gespeicherter Fortschritt oder eine Datenbank dazukommen. Das JSON-Format lässt sich dann direkt übernehmen.
 
 ## Reihenfolge
-ordnerstruktur.md befolgen. also andere namen, aber von stil her!! 
+ordnerstruktur.md befolgen
 1. Virtuelles Dateisystem und Grundbefehle (`pwd`, `cd`, `ls`, `mkdir`)
 2. Rechte-Befehle (`chmod`, `chown`, `chgrp`, `id`, SGID, `umask`)
 3. Aufgaben-JSON und Prüflogik

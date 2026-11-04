@@ -1,0 +1,604 @@
+[
+  {
+    "id": "login-ssh",
+    "category": "login",
+    "type": "terminal",
+    "text": "Melde dich per SSH als Benutzer `ben` auf dem Rechner `pi` an.",
+    "hints": ["Der Befehl heißt `ssh`.", "Schreibweise: `ssh benutzer@rechner`"],
+    "solutions": ["ssh ben@pi"],
+    "explanation": "`ssh benutzer@rechner` meldet dich als dieser Benutzer an. Statt des Namens geht auch die IP (192.168.0.42). Mit `exit` kommst du zurück.",
+    "check": { "type": "sessionUser", "user": "ben" }
+  },
+  {
+    "id": "login-ping",
+    "category": "login",
+    "type": "terminal",
+    "text": "Prüfe mit `ping`, ob der Rechner `server` erreichbar ist.",
+    "hints": ["`ping` gefolgt vom Rechnernamen."],
+    "solutions": ["ping server"],
+    "explanation": "Kommen Antworten (`64 bytes from …`), ist der Rechner erreichbar und der Name wurde aufgelöst. `Name or service not known` heißt: Name unbekannt. `Destination Host Unreachable` heißt: Name bekannt, aber keine Antwort.",
+    "check": { "type": "command", "pattern": "^ping( -c ?\\d+)? (server|192\\.168\\.0\\.10)$" }
+  },
+  {
+    "id": "login-prompt",
+    "category": "login",
+    "type": "question",
+    "text": "Der Prompt lautet `ben@pi:/projekt$`. Als welcher Benutzer bist du angemeldet?",
+    "hints": ["Der Prompt ist aufgebaut als `benutzer@rechner:pfad$`."],
+    "solutions": ["ben"],
+    "explanation": "Vor dem @ steht der Benutzer (ben), danach der Rechner (pi), nach dem Doppelpunkt das aktuelle Verzeichnis (/projekt). `$` steht für einen normalen Benutzer, `#` für root.",
+    "check": { "type": "answer", "accepted": ["ben"] }
+  },
+  {
+    "id": "login-help",
+    "category": "login",
+    "type": "terminal",
+    "text": "Lass dir die Hilfe zu `chmod` anzeigen – entweder die Handbuchseite oder die Kurzhilfe.",
+    "hints": ["Handbuch: `man …`, Kurzhilfe: `… --help`"],
+    "solutions": ["man chmod", "chmod --help"],
+    "explanation": "`man befehl` zeigt die ausführliche Handbuchseite, `befehl --help` eine kurze Übersicht der Syntax.",
+    "check": { "type": "command", "pattern": "^(man chmod|chmod --help)$" }
+  },
+  {
+    "id": "login-output",
+    "category": "login",
+    "type": "question",
+    "text": "`ls -l` zeigt: `-rw-r----- 1 ben team 120 Nov  3 09:15 plan.txt`. Wie groß ist die Datei in Byte?",
+    "hints": ["Reihenfolge: Rechte, Links, Besitzer, Gruppe, Größe, Datum, Name."],
+    "solutions": ["120"],
+    "explanation": "Die Zahl direkt vor dem Datum ist die Größe in Byte: 120.",
+    "check": { "type": "answer", "accepted": ["120", "120 byte", "120 bytes"] }
+  },
+  {
+    "id": "users-id",
+    "category": "users",
+    "type": "terminal",
+    "text": "Finde heraus, in welchen Gruppen der Benutzer `ben` ist.",
+    "hints": ["Der Befehl zeigt UID, GID und Gruppen.", "`id benutzer`"],
+    "solutions": ["id ben", "groups ben"],
+    "explanation": "`id ben` zeigt `uid=1001(ben) gid=1001(ben) groups=1001(ben),1100(team)`: ben ist in seiner Primärgruppe ben und zusätzlich in team.",
+    "check": { "type": "command", "pattern": "^(id|groups) ben$" }
+  },
+  {
+    "id": "users-primary",
+    "category": "users",
+    "type": "question",
+    "text": "`id ben` zeigt `uid=1001(ben) gid=1001(ben) groups=1001(ben),1100(team)`. Wie heißt bens Primärgruppe?",
+    "hints": ["Die Primärgruppe steht bei `gid=`."],
+    "solutions": ["ben"],
+    "explanation": "gid ist die Primärgruppe (ben). Neue Dateien bekommen normalerweise diese Gruppe. team ist eine weitere Gruppe.",
+    "check": { "type": "answer", "accepted": ["ben"] }
+  },
+  {
+    "id": "users-add",
+    "category": "users",
+    "type": "terminal",
+    "text": "Füge die Benutzerin `clara` zur Gruppe `team` hinzu. Du bist anna und darfst sudo verwenden.",
+    "hints": ["Dafür braucht man root-Rechte, also `sudo`.", "`sudo adduser benutzer gruppe` oder `sudo usermod -aG gruppe benutzer`"],
+    "solutions": ["sudo adduser clara team", "sudo usermod -aG team clara"],
+    "explanation": "Gruppenmitgliedschaften ändern darf nur root. Bei usermod ist das -a wichtig: ohne -a ersetzt -G alle weiteren Gruppen.",
+    "check": { "type": "groupMember", "user": "clara", "group": "team" }
+  },
+  {
+    "id": "users-relogin",
+    "category": "users",
+    "type": "question",
+    "text": "anna hat clara gerade mit `sudo adduser clara team` zur Gruppe team hinzugefügt. clara war schon eingeloggt und tippt `id` – team fehlt. Warum?",
+    "choices": [
+      "Die Gruppen werden beim Einloggen festgelegt – clara muss sich neu einloggen.",
+      "Der Befehl ist fehlgeschlagen.",
+      "`id` zeigt nur die Primärgruppe an."
+    ],
+    "hints": ["Probier es aus: `sudo adduser clara team`, dann `sudo su - clara` und `id`. Vergleiche mit einer Sitzung von vorher."],
+    "solutions": ["Die Gruppen werden beim Einloggen festgelegt – clara muss sich neu einloggen."],
+    "explanation": "Jede Sitzung bekommt ihre Gruppen beim Einloggen. Eine laufende Sitzung sieht die Änderung erst nach Ab- und wieder Anmelden. `id clara` (mit Namen) liest dagegen /etc/group und zeigt team sofort.",
+    "check": { "type": "answer", "accepted": ["Die Gruppen werden beim Einloggen festgelegt – clara muss sich neu einloggen."] }
+  },
+  {
+    "id": "users-sudo",
+    "category": "users",
+    "type": "question",
+    "text": "Wann solltest du `sudo` verwenden?",
+    "choices": [
+      "Nur wenn der Befehl root-Rechte braucht, z. B. Benutzer zu Gruppen hinzufügen.",
+      "Bei jedem Befehl, damit sicher nichts fehlschlägt.",
+      "Nur zum Lesen von Dateien."
+    ],
+    "hints": ["Mit sudo gelten keine Rechtegrenzen mehr – Fehler wirken sich voll aus."],
+    "solutions": ["Nur wenn der Befehl root-Rechte braucht, z. B. Benutzer zu Gruppen hinzufügen."],
+    "explanation": "sudo führt den Befehl als root aus. Unnötig verwendet, gehören neue Dateien root und Tippfehler können großen Schaden anrichten.",
+    "check": { "type": "answer", "accepted": ["Nur wenn der Befehl root-Rechte braucht, z. B. Benutzer zu Gruppen hinzufügen."] }
+  },
+  {
+    "id": "read-ls-line",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "`drwxrws--- 2 ben team 4096 Nov  3 09:15 protokolle` – wem gehört das Verzeichnis (Besitzer)?",
+    "hints": ["Nach der Link-Anzahl kommen Besitzer und Gruppe."],
+    "solutions": ["ben"],
+    "explanation": "d = Verzeichnis, rwxrws--- = Rechte, 2 = Links, ben = Besitzer, team = Gruppe, 4096 = Größe, dann Datum und Name.",
+    "check": { "type": "answer", "accepted": ["ben"] }
+  },
+  {
+    "id": "read-rwx-file",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "Was erlaubt das Recht `w` bei einer **Datei**?",
+    "choices": ["Den Inhalt der Datei ändern.", "Die Datei löschen.", "Die Datei ausführen."],
+    "hints": ["Löschen ist eine Änderung am Verzeichnis, nicht an der Datei."],
+    "solutions": ["Den Inhalt der Datei ändern."],
+    "explanation": "w auf einer Datei erlaubt das Ändern des Inhalts. Löschen oder Umbenennen hängt von w auf dem Verzeichnis ab, in dem die Datei liegt.",
+    "check": { "type": "answer", "accepted": ["Den Inhalt der Datei ändern."] }
+  },
+  {
+    "id": "read-rwx-dir",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "Was erlaubt das Recht `x` bei einem **Verzeichnis**?",
+    "choices": [
+      "Hineinwechseln (cd) und auf die Einträge darin zugreifen.",
+      "Den Inhalt auflisten (ls).",
+      "Dateien darin anlegen und löschen."
+    ],
+    "hints": ["r = auflisten, w = anlegen/löschen, x = …"],
+    "solutions": ["Hineinwechseln (cd) und auf die Einträge darin zugreifen."],
+    "explanation": "Beim Verzeichnis: r = Inhalt auflisten, w = Einträge anlegen und löschen (nur zusammen mit x), x = hineinwechseln und auf Einträge zugreifen.",
+    "check": { "type": "answer", "accepted": ["Hineinwechseln (cd) und auf die Einträge darin zugreifen."] }
+  },
+  {
+    "id": "read-octal",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "Rechne `rwxr-x---` in die oktale Schreibweise um.",
+    "hints": ["r = 4, w = 2, x = 1. Jede Dreiergruppe ergibt eine Ziffer.", "rwx = 4+2+1, r-x = 4+0+1, --- = 0"],
+    "solutions": ["750"],
+    "explanation": "rwx = 7, r-x = 5, --- = 0, also 750.",
+    "check": { "type": "answer", "accepted": ["750", "0750"] }
+  },
+  {
+    "id": "read-octal-2",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "Wie lautet `640` in symbolischer Schreibweise (ohne Dateityp)?",
+    "hints": ["6 = 4+2 = rw-, 4 = r--, 0 = ---"],
+    "solutions": ["rw-r-----"],
+    "explanation": "6 = rw-, 4 = r--, 0 = ---, zusammen rw-r-----.",
+    "check": { "type": "answer", "accepted": ["rw-r-----"] }
+  },
+  {
+    "id": "read-who",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "`-rw-r----- 1 anna team 80 Nov  3 09:15 bericht.txt` – welche Rechte hat **ben** (Mitglied von team) an der Datei? Antworte symbolisch, z. B. `rw-`.",
+    "hints": ["ben ist nicht der Besitzer. Ist er in der Gruppe?", "Es gilt genau eine Klasse: Besitzer, sonst Gruppe, sonst others."],
+    "solutions": ["r--"],
+    "explanation": "ben ist nicht Besitzer, aber in team, also gilt die mittlere Dreiergruppe: r-- (nur lesen).",
+    "check": { "type": "answer", "accepted": ["r--", "r", "lesen", "nur lesen"] }
+  },
+  {
+    "id": "read-tree",
+    "category": "readPermissions",
+    "type": "question",
+    "text": "Untersuche im Terminal: Welcher Gruppe gehört `/projekt/protokolle`, und welche Rechte hat others? Antwort im Format `gruppe,rechte`, z. B. `team,r-x`.",
+    "hints": ["`ls -l /projekt` oder `ls -ld /projekt/protokolle`", "Die letzten drei Zeichen der Rechte gehören zu others."],
+    "solutions": ["team,---"],
+    "explanation": "`drwxrws--- ben team … protokolle`: Gruppe team, others hat ---, also gar keine Rechte.",
+    "check": { "type": "answer", "accepted": ["team,---"] }
+  },
+  {
+    "id": "chmod-octal",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "Nur du (anna) sollst auf `~/privat` zugreifen dürfen: alle Rechte für dich, keine für Gruppe und others. Setze die Rechte **oktal**.",
+    "setup": ["mkdir /home/anna/privat", "chown anna:anna /home/anna/privat", "chmod 755 /home/anna/privat"],
+    "hints": ["Der Befehl ist `chmod`.", "rwx = 7, --- = 0: `chmod ??? ~/privat`"],
+    "solutions": ["chmod 700 ~/privat"],
+    "explanation": "700 = rwx------. Nur der Besitzer darf hinein, lesen und schreiben.",
+    "check": { "type": "mode", "path": "/home/anna/privat", "mode": "700" }
+  },
+  {
+    "id": "chmod-octal-2",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "`~/notizen.txt` hat `rw-r--r--`. others soll gar nichts mehr dürfen, sonst bleibt alles gleich. Setze die Rechte oktal.",
+    "hints": ["rw- = 6, r-- = 4, --- = 0"],
+    "solutions": ["chmod 640 ~/notizen.txt"],
+    "explanation": "640 = rw-r-----: Besitzer lesen und schreiben, Gruppe lesen, others nichts.",
+    "check": { "type": "mode", "path": "/home/anna/notizen.txt", "mode": "640" }
+  },
+  {
+    "id": "chmod-symbolic",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "Entferne für others alle Rechte an `/projekt/plan.txt`, ohne die übrigen Rechte anzufassen. Nutze die **symbolische** Schreibweise.",
+    "hints": ["o = others, - = entfernen", "`chmod o-??? /projekt/plan.txt`"],
+    "solutions": ["chmod o-rwx /projekt/plan.txt", "chmod o= /projekt/plan.txt"],
+    "explanation": "`o-rwx` nimmt others alle Rechte, Besitzer und Gruppe bleiben unverändert (rw-rw-r-- wird rw-rw----).",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "mode", "path": "/projekt/plan.txt", "mode": "660" },
+        { "type": "command", "pattern": "^(sudo )?chmod [ugoa]*[-+=]" }
+      ]
+    }
+  },
+  {
+    "id": "chown-both",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "Die Datei `~/abgabe.txt` soll künftig **ben** gehören und der Gruppe **team**.",
+    "setup": ["touch /home/anna/abgabe.txt", "chown anna:anna /home/anna/abgabe.txt", "chmod 664 /home/anna/abgabe.txt"],
+    "hints": ["Besitzer ändern darf nur root.", "`sudo chown besitzer:gruppe datei`"],
+    "solutions": ["sudo chown ben:team ~/abgabe.txt"],
+    "explanation": "`chown ben:team` setzt Besitzer und Gruppe auf einmal. Den Besitzer ändern darf nur root, deshalb sudo.",
+    "check": { "type": "owner", "path": "/home/anna/abgabe.txt", "owner": "ben", "group": "team" }
+  },
+  {
+    "id": "chgrp",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "Ändere die Gruppe von `~/notizen.txt` auf `team`. Geht das ohne sudo?",
+    "hints": ["Du bist Besitzerin und Mitglied von team.", "`chgrp gruppe datei` oder `chown :gruppe datei`"],
+    "solutions": ["chgrp team ~/notizen.txt", "chown :team ~/notizen.txt"],
+    "explanation": "Als Besitzerin darfst du die Gruppe auf eine Gruppe ändern, in der du selbst bist. sudo ist dafür nicht nötig.",
+    "check": { "type": "owner", "path": "/home/anna/notizen.txt", "owner": "anna", "group": "team" }
+  },
+  {
+    "id": "change-decide",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "`/projekt/bericht.txt` gehört `anna:team` mit `rw-r-----`. ben (in team) soll die Datei **bearbeiten** können. Ändere nur, was nötig ist: Besitzer, Gruppe oder Rechte?",
+    "setup": ["touch /projekt/bericht.txt", "chown anna:team /projekt/bericht.txt", "chmod 640 /projekt/bericht.txt"],
+    "hints": ["Die Gruppe passt schon. Was fehlt der Gruppe?", "`chmod g+w …`"],
+    "solutions": ["chmod g+w /projekt/bericht.txt", "chmod 660 /projekt/bericht.txt"],
+    "explanation": "Gruppe und Besitzer stimmen schon. Der Gruppe fehlt nur w, also reicht `chmod g+w`.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "mode", "path": "/projekt/bericht.txt", "mode": "660" },
+        { "type": "owner", "path": "/projekt/bericht.txt", "owner": "anna", "group": "team" }
+      ]
+    }
+  },
+  {
+    "id": "change-others",
+    "category": "changePermissions",
+    "type": "question",
+    "text": "Warum vergibt man Rechte für others möglichst nicht?",
+    "choices": [
+      "others sind alle übrigen Benutzer des Systems – damit bekämen zu viele Personen Zugriff.",
+      "others ist nur root, der braucht keine Rechte.",
+      "Rechte für others werden nicht gespeichert."
+    ],
+    "hints": ["Wer fällt unter others?"],
+    "solutions": ["others sind alle übrigen Benutzer des Systems – damit bekämen zu viele Personen Zugriff."],
+    "explanation": "others umfasst jeden, der weder Besitzer noch in der Gruppe ist. Gezielter ist es, Personen über eine Gruppe zu berechtigen.",
+    "check": { "type": "answer", "accepted": ["others sind alle übrigen Benutzer des Systems – damit bekämen zu viele Personen Zugriff."] }
+  },
+  {
+    "id": "change-order",
+    "category": "changePermissions",
+    "type": "terminal",
+    "text": "Übergib `~/uebergabe.txt` an ben: Rechte `600` und Besitzer `ben`. Wähle die Reihenfolge so, dass du so wenig sudo wie möglich brauchst.",
+    "setup": ["touch /home/anna/uebergabe.txt", "chown anna:anna /home/anna/uebergabe.txt", "chmod 664 /home/anna/uebergabe.txt"],
+    "hints": ["Rechte ändern darf nur der Besitzer (oder root).", "Erst `chmod`, solange die Datei noch dir gehört, dann `sudo chown`."],
+    "solutions": ["chmod 600 ~/uebergabe.txt", "sudo chown ben ~/uebergabe.txt"],
+    "solutionIsSequence": true,
+    "explanation": "Erst chmod (geht ohne sudo, du bist noch Besitzerin), dann `sudo chown ben`. Andersherum gehört dir die Datei nicht mehr und du brauchst auch für chmod sudo.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "mode", "path": "/home/anna/uebergabe.txt", "mode": "600" },
+        { "type": "owner", "path": "/home/anna/uebergabe.txt", "owner": "ben" }
+      ]
+    }
+  },
+  {
+    "id": "sgid-effect",
+    "category": "sgid",
+    "type": "question",
+    "text": "Was bewirkt das SGID-Bit an einem **Verzeichnis**?",
+    "choices": [
+      "Neue Dateien und Ordner darin bekommen die Gruppe des Verzeichnisses.",
+      "Programme darin laufen mit den Rechten der Gruppe.",
+      "Nur der Besitzer einer Datei darf sie löschen."
+    ],
+    "hints": ["Es geht um die Gruppe neuer Einträge."],
+    "solutions": ["Neue Dateien und Ordner darin bekommen die Gruppe des Verzeichnisses."],
+    "explanation": "Ohne SGID bekommt eine neue Datei die Primärgruppe des Erstellers, mit SGID die Gruppe des Verzeichnisses. Neue Unterordner erben auch das SGID-Bit. (Die dritte Antwort beschreibt das Sticky-Bit.)",
+    "check": { "type": "answer", "accepted": ["Neue Dateien und Ordner darin bekommen die Gruppe des Verzeichnisses."] }
+  },
+  {
+    "id": "sgid-set",
+    "category": "sgid",
+    "type": "terminal",
+    "text": "Setze das SGID-Bit auf `~/gemeinsam`.",
+    "setup": ["mkdir /home/anna/gemeinsam", "chown anna:team /home/anna/gemeinsam", "chmod 775 /home/anna/gemeinsam"],
+    "hints": ["g = Gruppe, s = SGID", "`chmod g+s …`"],
+    "solutions": ["chmod g+s ~/gemeinsam", "chmod 2775 ~/gemeinsam"],
+    "explanation": "`chmod g+s` setzt SGID, aus rwxrwxr-x wird rwxrwsr-x (oktal 2775).",
+    "check": { "type": "mode", "path": "/home/anna/gemeinsam", "mode": "2775" }
+  },
+  {
+    "id": "sgid-octal",
+    "category": "sgid",
+    "type": "question",
+    "text": "Ein Verzeichnis hat `rwxrwxr-x`. Dann wird `chmod g+s` ausgeführt. Wie lauten die Rechte jetzt **oktal**?",
+    "hints": ["775 bleibt, davor kommt eine Ziffer für die Spezialbits.", "SUID = 4, SGID = 2, Sticky = 1"],
+    "solutions": ["2775"],
+    "explanation": "SGID ist die 2 an der vierten Stelle: 2775.",
+    "check": { "type": "answer", "accepted": ["2775", "02775"] }
+  },
+  {
+    "id": "sgid-symbolic",
+    "category": "sgid",
+    "type": "question",
+    "text": "Ein Verzeichnis hat `rwxrwxr-x`. Dann wird `chmod g+s` ausgeführt. Wie lauten die Rechte jetzt **symbolisch** (ohne Dateityp)?",
+    "hints": ["Das s ersetzt das x der Gruppe."],
+    "solutions": ["rwxrwsr-x"],
+    "explanation": "Das x der Gruppe wird als s angezeigt: rwxrwsr-x.",
+    "check": { "type": "answer", "accepted": ["rwxrwsr-x"] }
+  },
+  {
+    "id": "sgid-small-s",
+    "category": "sgid",
+    "type": "question",
+    "text": "Warum steht in `rwxrwsr-x` ein **kleines** `s`?",
+    "choices": [
+      "SGID ist gesetzt und die Gruppe hat zusätzlich x.",
+      "SGID ist gesetzt, aber die Gruppe hat kein x.",
+      "Es handelt sich um einen Socket."
+    ],
+    "hints": ["Ein großes S gibt es auch. Was fehlt dann?"],
+    "solutions": ["SGID ist gesetzt und die Gruppe hat zusätzlich x."],
+    "explanation": "Das s steht an der Stelle des x. Klein = SGID und x, groß S = SGID ohne x.",
+    "check": { "type": "answer", "accepted": ["SGID ist gesetzt und die Gruppe hat zusätzlich x."] }
+  },
+  {
+    "id": "sgid-retro",
+    "category": "sgid",
+    "type": "question",
+    "text": "In `~/alt` lag schon `notiz.txt` (Gruppe anna). Danach wurde `chgrp team ~/alt` und `chmod g+s ~/alt` ausgeführt. Welche Gruppe hat `notiz.txt` jetzt? Du kannst es im Terminal prüfen.",
+    "setup": [
+      "mkdir /home/anna/alt",
+      "touch /home/anna/alt/notiz.txt",
+      "chown -R anna:anna /home/anna/alt",
+      "chgrp team /home/anna/alt",
+      "chmod 2775 /home/anna/alt"
+    ],
+    "hints": ["Wirkt SGID auch auf Dateien, die schon da waren?", "`ls -l ~/alt`"],
+    "solutions": ["anna"],
+    "explanation": "SGID wirkt nur auf neue Einträge, nicht rückwirkend. notiz.txt behält die Gruppe anna. Vorhandene Dateien müsste man mit `chgrp` anpassen.",
+    "check": { "type": "answer", "accepted": ["anna"] }
+  },
+  {
+    "id": "sgid-who",
+    "category": "sgid",
+    "type": "question",
+    "text": "Wer darf das SGID-Bit auf `/projekt` setzen? (`drwxrwxr-x root team /projekt`)",
+    "choices": [
+      "Nur root (mit sudo), weil root der Besitzer ist.",
+      "Jedes Mitglied von team.",
+      "Jeder, der w auf /projekt hat."
+    ],
+    "hints": ["Wer darf überhaupt mit chmod die Rechte ändern?"],
+    "solutions": ["Nur root (mit sudo), weil root der Besitzer ist."],
+    "explanation": "Rechte ändern (auch SGID) darf nur der Besitzer oder root. Hier ist root der Besitzer, team-Mitglieder brauchen also sudo.",
+    "check": { "type": "answer", "accepted": ["Nur root (mit sudo), weil root der Besitzer ist."] }
+  },
+  {
+    "id": "files-cd",
+    "category": "files",
+    "type": "terminal",
+    "text": "Wechsle mit einem **absoluten** Pfad nach `/projekt/protokolle`.",
+    "hints": ["Absolute Pfade beginnen mit /."],
+    "solutions": ["cd /projekt/protokolle"],
+    "explanation": "Ein absoluter Pfad beginnt bei / und funktioniert egal, wo du gerade bist.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "cwd", "path": "/projekt/protokolle" },
+        { "type": "command", "pattern": "^cd /" }
+      ]
+    }
+  },
+  {
+    "id": "files-dots",
+    "category": "files",
+    "type": "terminal",
+    "text": "Du bist in `/projekt/protokolle`. Wechsle mit einem **relativen** Pfad eine Ebene höher nach `/projekt`.",
+    "cwd": "/projekt/protokolle",
+    "hints": [".. ist das übergeordnete Verzeichnis."],
+    "solutions": ["cd .."],
+    "explanation": ". ist das aktuelle Verzeichnis, .. das übergeordnete, ~ dein Home.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "cwd", "path": "/projekt" },
+        { "type": "command", "pattern": "^cd [^/~]" }
+      ]
+    }
+  },
+  {
+    "id": "files-mkdir-relative",
+    "category": "files",
+    "type": "terminal",
+    "text": "Du bist in `~/dokumente`. Lege **ohne** das Verzeichnis zu wechseln den Ordner `entwuerfe` direkt in deinem Home an – mit relativem Pfad.",
+    "cwd": "/home/anna/dokumente",
+    "hints": ["Dein Home liegt eine Ebene über dir.", "`mkdir ../…`"],
+    "solutions": ["mkdir ../entwuerfe"],
+    "explanation": "`../entwuerfe` zeigt vom aktuellen Ordner eine Ebene höher. So legst du Ordner an, ohne cd zu benutzen.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "exists", "path": "/home/anna/entwuerfe", "nodeType": "directory" },
+        { "type": "cwd", "path": "/home/anna/dokumente" }
+      ]
+    }
+  },
+  {
+    "id": "files-ls-dir",
+    "category": "files",
+    "type": "terminal",
+    "text": "Lass dir den Inhalt von `/projekt` **ausführlich** (mit Rechten) anzeigen, ohne hineinzuwechseln.",
+    "hints": ["Ausführlich = -l", "`ls -l pfad`"],
+    "solutions": ["ls -l /projekt"],
+    "explanation": "`ls -l /projekt` listet ein beliebiges Verzeichnis auf, ohne dass du hineinwechseln musst.",
+    "check": { "type": "command", "pattern": "^(ls( -[a-z]+)* -[a-z]*l[a-z]*( -[a-z]+)*|ll) /projekt/?$" }
+  },
+  {
+    "id": "files-predict",
+    "category": "files",
+    "type": "question",
+    "text": "anna (umask `0002`) legt in `/projekt` (`drwxrwsr-x root team`) mit `touch neu.txt` eine Datei an. Welche Rechte (symbolisch, ohne Typ) und welche Gruppe hat sie? Format: `rechte,gruppe`",
+    "hints": ["Neue Dateien: 666 minus umask.", "SGID am Ordner: welche Gruppe?"],
+    "solutions": ["rw-rw-r--,team"],
+    "explanation": "666 − 002 = 664 = rw-rw-r--. Wegen SGID an /projekt bekommt die Datei die Gruppe team statt annas Primärgruppe.",
+    "check": { "type": "answer", "accepted": ["rw-rw-r--,team"] }
+  },
+  {
+    "id": "files-mv",
+    "category": "files",
+    "type": "terminal",
+    "text": "Verschiebe `~/notizen.txt` in den Ordner `~/dokumente`.",
+    "hints": ["Verschieben heißt auf Englisch move."],
+    "solutions": ["mv ~/notizen.txt ~/dokumente/"],
+    "explanation": "`mv quelle ziel` verschiebt. Ist das Ziel ein Ordner, landet die Datei darin.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "exists", "path": "/home/anna/dokumente/notizen.txt", "nodeType": "file" },
+        { "type": "notExists", "path": "/home/anna/notizen.txt" }
+      ]
+    }
+  },
+  {
+    "id": "files-cp",
+    "category": "files",
+    "type": "terminal",
+    "text": "Kopiere `/projekt/plan.txt` in dein Home.",
+    "hints": ["Kopieren heißt copy.", "~ ist dein Home."],
+    "solutions": ["cp /projekt/plan.txt ~"],
+    "explanation": "`cp quelle ziel` kopiert, die Quelle bleibt erhalten. Die Kopie gehört dir.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "exists", "path": "/home/anna/plan.txt", "nodeType": "file" },
+        { "type": "exists", "path": "/projekt/plan.txt", "nodeType": "file" }
+      ]
+    }
+  },
+  {
+    "id": "files-rm",
+    "category": "files",
+    "type": "terminal",
+    "text": "Lösche die Datei `~/dokumente/bericht.txt`.",
+    "hints": ["Löschen heißt remove."],
+    "solutions": ["rm ~/dokumente/bericht.txt"],
+    "explanation": "`rm datei` löscht ohne Papierkorb. Für Verzeichnisse braucht man `rm -r`.",
+    "check": { "type": "notExists", "path": "/home/anna/dokumente/bericht.txt" }
+  },
+  {
+    "id": "files-cp-rm",
+    "category": "files",
+    "type": "question",
+    "text": "Welche Befehlsfolge hat dasselbe Ergebnis wie `mv a.txt b.txt`?",
+    "choices": [
+      "`cp a.txt b.txt` und danach `rm a.txt`",
+      "`cp a.txt b.txt`",
+      "`rm b.txt` und danach `cp a.txt b.txt`"
+    ],
+    "hints": ["Nach mv gibt es a.txt nicht mehr."],
+    "solutions": ["`cp a.txt b.txt` und danach `rm a.txt`"],
+    "explanation": "Kopieren und das Original löschen ergibt dasselbe wie verschieben bzw. umbenennen.",
+    "check": { "type": "answer", "accepted": ["`cp a.txt b.txt` und danach `rm a.txt`"] }
+  },
+  {
+    "id": "access-path",
+    "category": "access",
+    "type": "question",
+    "text": "clara möchte `/home/anna/notizen.txt` (`-rw-r--r-- anna anna`) lesen. Klappt das? Prüfe den **ganzen** Pfad. (ja/nein)",
+    "hints": ["`ls -ld /home/anna` – welche Rechte hat others?", "Für den Zugriff braucht man x auf jedem Verzeichnis im Pfad."],
+    "solutions": ["nein"],
+    "explanation": "/home/anna hat rwxr-x---. clara ist dort others und hat kein x, kommt also nicht an die Datei – obwohl die Datei selbst r für others hat.",
+    "check": { "type": "answer", "accepted": ["nein"] }
+  },
+  {
+    "id": "access-cd",
+    "category": "access",
+    "type": "question",
+    "text": "Kann ben in `/projekt/protokolle` wechseln? (ja/nein)",
+    "hints": ["`ls -ld /projekt /projekt/protokolle`", "cd braucht x."],
+    "solutions": ["ja"],
+    "explanation": "/projekt hat r-x für others und rwx für team, protokolle gehört ben selbst (rwx). Er hat also überall x.",
+    "check": { "type": "answer", "accepted": ["ja"] }
+  },
+  {
+    "id": "access-list",
+    "category": "access",
+    "type": "question",
+    "text": "Kann clara (nicht in team) den Inhalt von `/projekt` auflisten? (ja/nein)",
+    "hints": ["`ls -ld /projekt` – auflisten braucht r."],
+    "solutions": ["ja"],
+    "explanation": "/projekt hat rwxrwsr-x. others (clara) hat r-x und darf daher auflisten.",
+    "check": { "type": "answer", "accepted": ["ja"] }
+  },
+  {
+    "id": "access-create",
+    "category": "access",
+    "type": "question",
+    "text": "Kann clara (nicht in team) in `/projekt` eine Datei anlegen? (ja/nein)",
+    "hints": ["Anlegen braucht w und x auf dem Verzeichnis."],
+    "solutions": ["nein"],
+    "explanation": "others hat auf /projekt nur r-x, kein w. Probier es: `sudo su - clara` und `touch /projekt/test`.",
+    "check": { "type": "answer", "accepted": ["nein"] }
+  },
+  {
+    "id": "access-copy",
+    "category": "access",
+    "type": "question",
+    "text": "Kann ben `/projekt/plan.txt` (`-rw-rw-r-- anna team`) in sein Home kopieren? (ja/nein)",
+    "hints": ["Kopieren braucht r auf der Datei, x auf dem Pfad und w auf dem Ziel."],
+    "solutions": ["ja"],
+    "explanation": "ben hat x auf /projekt, r auf plan.txt (team) und w in seinem eigenen Home.",
+    "check": { "type": "answer", "accepted": ["ja"] }
+  },
+  {
+    "id": "access-negation",
+    "category": "access",
+    "type": "question",
+    "text": "Stimmt die Aussage: „clara kann **keine** Dateien in `/tmp` anlegen“? (stimmt/stimmt nicht)",
+    "hints": ["`ls -ld /tmp`", "Achte auf die Verneinung."],
+    "solutions": ["stimmt nicht"],
+    "explanation": "/tmp hat rwxrwxrwt: jeder darf dort anlegen. Die Aussage „kann keine“ ist also falsch.",
+    "check": { "type": "answer", "accepted": ["stimmt nicht", "falsch"] }
+  },
+  {
+    "id": "access-sequence",
+    "category": "access",
+    "type": "question",
+    "text": "Vorher wurde `chmod 750 /projekt` ausgeführt. Kann clara jetzt noch `/projekt/plan.txt` lesen? (ja/nein)",
+    "setup": ["chmod 750 /projekt"],
+    "hints": ["Die Änderung ist die neue Ausgangslage: `ls -ld /projekt`"],
+    "solutions": ["nein"],
+    "explanation": "Mit 750 hat others auf /projekt kein x mehr. clara kommt nicht an plan.txt, obwohl die Datei r für others hat. Achtung: 750 ohne vierte Ziffer lässt das SGID-Bit am Verzeichnis stehen.",
+    "check": { "type": "answer", "accepted": ["nein"] }
+  },
+  {
+    "id": "access-fix",
+    "category": "access",
+    "type": "terminal",
+    "text": "clara soll die Protokolle in `/projekt/protokolle` lesen können. Löse das möglichst sparsam – **ohne** Rechte für others.",
+    "hints": ["Wer darf heute in protokolle? Schau dir Gruppe und Rechte an.", "Statt Rechte zu ändern: clara in die passende Gruppe aufnehmen."],
+    "solutions": ["sudo adduser clara team"],
+    "explanation": "protokolle (ben:team, rwxrws---) ist für team freigegeben. clara in team aufzunehmen reicht. Dafür müssen keine Rechte geöffnet werden. Wirkt nach erneutem Einloggen.",
+    "check": {
+      "type": "all",
+      "checks": [
+        { "type": "groupMember", "user": "clara", "group": "team" },
+        { "type": "mode", "path": "/projekt/protokolle", "mode": "2770" },
+        { "type": "mode", "path": "/projekt", "mode": "2775" }
+      ]
+    }
+  }
+]
