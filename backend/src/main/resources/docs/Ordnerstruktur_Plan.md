@@ -16,7 +16,6 @@ Nicht enthalten sind generierte bzw. ignorierte Ordner wie `node_modules/`, `tar
 | `frontend/src/components/utils/commands/` | Ein Modul pro simuliertem Linux-Befehl |
 | `frontend/src/components/utils/filesystem/` | Virtuelles Dateisystem, Benutzer, Gruppen, Rechteprüfung |
 | `frontend/src/data/` | Aufgaben als JSON (nur Inhalt, wird nie verändert) |
-| `frontend/src/assets/` | Bilder, Logos |
 
 ## Struktur
 
@@ -53,8 +52,6 @@ evp-pi/
 │   ├── public/
 │   │   └── favicon.svg
 │   ├── src/
-│   │   ├── assets/
-│   │   │   └── terminal-logo.svg
 │   │   ├── components/
 │   │   │   ├── practice/
 │   │   │   │   ├── ExamResult.tsx
@@ -65,9 +62,11 @@ evp-pi/
 │   │   │   ├── task/
 │   │   │   │   ├── TaskAnswerInput.tsx
 │   │   │   │   ├── TaskButtons.tsx
+│   │   │   │   ├── TaskFormattedText.tsx
 │   │   │   │   ├── TaskHint.tsx
 │   │   │   │   ├── TaskPanel.tsx
 │   │   │   │   ├── TaskRating.tsx
+│   │   │   │   ├── TaskSession.tsx
 │   │   │   │   ├── TaskSolution.tsx
 │   │   │   │   └── TaskSuccess.tsx
 │   │   │   ├── terminal/
@@ -104,10 +103,15 @@ evp-pi/
 │   │   │   │   │   ├── ChmodCommand.ts
 │   │   │   │   │   ├── ChownCommand.ts
 │   │   │   │   │   ├── ClearCommand.ts
+│   │   │   │   │   ├── CommandHelpers.ts
 │   │   │   │   │   ├── CommandRegistry.ts
 │   │   │   │   │   ├── CpCommand.ts
 │   │   │   │   │   ├── EchoCommand.ts
+│   │   │   │   │   ├── ExitCommand.ts
+│   │   │   │   │   ├── GroupsCommand.ts
+│   │   │   │   │   ├── HelpCommand.ts
 │   │   │   │   │   ├── HelpTexts.ts
+│   │   │   │   │   ├── HostnameCommand.ts
 │   │   │   │   │   ├── IdCommand.ts
 │   │   │   │   │   ├── LsCommand.ts
 │   │   │   │   │   ├── ManCommand.ts
@@ -116,6 +120,7 @@ evp-pi/
 │   │   │   │   │   ├── PingCommand.ts
 │   │   │   │   │   ├── PwdCommand.ts
 │   │   │   │   │   ├── RmCommand.ts
+│   │   │   │   │   ├── RmdirCommand.ts
 │   │   │   │   │   ├── SshCommand.ts
 │   │   │   │   │   ├── SuCommand.ts
 │   │   │   │   │   ├── SudoCommand.ts
@@ -132,6 +137,8 @@ evp-pi/
 │   │   │   │   ├── CommandParser.ts
 │   │   │   │   ├── ProgressStorage.ts
 │   │   │   │   ├── RepetitionScheduler.ts
+│   │   │   │   ├── SessionManager.ts
+│   │   │   │   ├── TabCompletion.ts
 │   │   │   │   ├── TaskChecker.ts
 │   │   │   │   └── TaskFilters.ts
 │   │   │   ├── Footer.tsx
@@ -175,3 +182,11 @@ evp-pi/
 - Neuer Ordner `data/` für die Aufgaben-JSON.
 - `utils/` hat Unterordner (`commands/`, `filesystem/`), weil es sonst über 30 Dateien in einem Ordner wären.
 - Backend bleibt minimal: keine Controller, Services oder Repositories, solange es keine Datenbank gibt.
+- Kein `assets/`-Ordner, solange es keine Bilder gibt.
+- Bei der Umsetzung dazugekommen:
+  - `task/TaskSession.tsx`: eine Aufgabe samt Terminal, genutzt von Üben und Prüfung
+  - `task/TaskFormattedText.tsx`: zeigt `code` und **fett** aus den Aufgabentexten an
+  - `utils/SessionManager.ts`: Sitzungen für `ssh`, `su`, `exit` und bekannte Rechner für `ping`
+  - `utils/TabCompletion.ts`: Tab-Vervollständigung für Befehle und Pfade
+  - `utils/commands/CommandHelpers.ts`: gemeinsame Hilfen (Anlegen mit umask/SGID, Sticky-Bit)
+  - weitere Befehle: `exit`/`logout`, `groups`, `help`, `hostname`, `rmdir`
