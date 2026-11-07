@@ -2,6 +2,7 @@ import tasksJson from "../../data/tasks.json";
 import type { PracticeSettingsModel, ProgressModel, RatingFilter } from "../models/ProgressModel.ts";
 import type { TaskModel } from "../models/TaskModel.ts";
 import { isDue } from "./RepetitionScheduler.ts";
+import { pickRandom } from "./Shuffle.ts";
 
 export const ALL_TASKS = tasksJson as TaskModel[];
 
@@ -28,8 +29,8 @@ export function filterTasks(settings: PracticeSettingsModel, progress: ProgressM
 
 /**
  * Nächste Aufgabe wählen:
- * 1. fällige, am längsten überfällige zuerst
- * 2. dann neue in Reihenfolge der Kannliste
+ * 1. fällige, zufällig gewählt
+ * 2. dann neue, zufällig gewählt
  * 3. sonst (alles erledigt) die, die am frühesten wieder dran wäre
  * Die aktuelle Aufgabe wird nur gewählt, wenn es keine andere gibt.
  */
@@ -43,12 +44,10 @@ export function pickNextTask(
     const others = candidates.filter((task) => task.id !== currentId);
     const pool = others.length > 0 ? others : candidates;
 
-    const due = pool
-        .filter((task) => progress[task.id] && isDue(progress[task.id], now))
-        .sort((a, b) => progress[a.id].due - progress[b.id].due);
-    if (due.length > 0) return { task: due[0], ahead: false };
+    const due = pickRandom(pool.filter((task) => progress[task.id] && isDue(progress[task.id], now)));
+    if (due) return { task: due, ahead: false };
 
-    const fresh = pool.find((task) => !progress[task.id]);
+    const fresh = pickRandom(pool.filter((task) => !progress[task.id]));
     if (fresh) return { task: fresh, ahead: false };
 
     const upcoming = [...pool].sort((a, b) => progress[a.id].due - progress[b.id].due);

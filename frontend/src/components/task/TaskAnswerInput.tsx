@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { shuffle } from "../utils/Shuffle.ts";
 import TaskFormattedText from "./TaskFormattedText.tsx";
 
 type TaskAnswerInputProps = {
@@ -10,16 +11,18 @@ type TaskAnswerInputProps = {
 
 export default function TaskAnswerInput({ choices, disabled, wrong, onAnswer }: Readonly<TaskAnswerInputProps>) {
     const [answer, setAnswer] = useState("");
+    // Antwortmöglichkeiten einmal pro Aufgabe mischen, damit man sich nicht die Position merkt
+    const [shuffledChoices] = useState(() => (choices ? shuffle(choices) : undefined));
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
         if (answer.trim()) onAnswer(answer);
     };
 
-    if (choices) {
+    if (shuffledChoices) {
         return (
             <div className="task-choices">
-                {choices.map((choice) => (
+                {shuffledChoices.map((choice) => (
                     <button
                         key={choice}
                         type="button"

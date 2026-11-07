@@ -6,6 +6,7 @@ type NavbarProps = {
 
 const LINKS = [
     { route: "/", label: "Start" },
+    { route: "/inhalt", label: "Inhalt" },
     { route: "/ueben", label: "Üben" },
     { route: "/pruefung", label: "Prüfung" },
     { route: "/fortschritt", label: "Fortschritt" },

@@ -4,6 +4,7 @@ import "./components/styles/Buttons.css";
 import Footer from "./components/Footer.tsx";
 import Navbar from "./components/Navbar.tsx";
 import NotFound from "./components/NotFound.tsx";
+import Content from "./components/practice/Content.tsx";
 import Exam from "./components/practice/Exam.tsx";
 import Practice from "./components/practice/Practice.tsx";
 import ProgressOverview from "./components/practice/ProgressOverview.tsx";
@@ -19,6 +20,8 @@ function renderPage(route: string) {
     switch (route) {
         case "/":
             return <Welcome />;
+        case "/inhalt":
+            return <Content />;
         case "/ueben":
             return <Practice />;
         case "/pruefung":

@@ -5,19 +5,11 @@ import type { TaskModel } from "../models/TaskModel.ts";
 import TaskSession from "../task/TaskSession.tsx";
 import { loadProgress, saveProgress } from "../utils/ProgressStorage.ts";
 import { applyRating } from "../utils/RepetitionScheduler.ts";
+import { shuffle } from "../utils/Shuffle.ts";
 import { ALL_TASKS } from "../utils/TaskFilters.ts";
 import ExamResult, { type ExamAnswer } from "./ExamResult.tsx";
 
 const COUNTS = [10, 20, 0];
-
-function shuffle<T>(items: T[]): T[] {
-    const copy = [...items];
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-}
 
 export default function Exam() {
     const [category, setCategory] = useState<TaskCategory | "alle">("alle");
