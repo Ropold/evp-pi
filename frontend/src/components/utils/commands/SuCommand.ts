@@ -16,7 +16,7 @@ export const suCommand: Command = (args, state) => {
             lines: [
                 "Password: ",
                 "su: Authentication failure",
-                "(Simulation: keine Passwörter – nutze sudo su - " + user + " oder ssh " + user + "@pi)",
+                "(Simulation: keine Passwörter – nutze sudo su - " + user + " oder ssh " + user + "@" + state.fs.hostname + ")",
             ],
         };
     }

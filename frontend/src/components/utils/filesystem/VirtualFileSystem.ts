@@ -25,6 +25,11 @@ export class VirtualFileSystem {
     root: FileSystemNodeModel;
     users: UserModel[];
     groups: GroupModel[];
+    /** Name des simulierten Rechners (Prompt, hostname, ssh) */
+    hostname = "pi";
+    /** umask je Benutzer beim Anmelden, sonst defaultUmask (root immer 0022) */
+    umasks: Record<string, number> = {};
+    defaultUmask = 0o002;
 
     constructor(root: FileSystemNodeModel, users: UserModel[], groups: GroupModel[]) {
         this.root = root;
@@ -38,6 +43,22 @@ export class VirtualFileSystem {
 
     findGroup(name: string): GroupModel | undefined {
         return this.groups.find((group) => group.name === name);
+    }
+
+    umaskFor(user: string): number {
+        if (user === "root") return 0o022;
+        return this.umasks[user] ?? this.defaultUmask;
+    }
+
+    /** Alle Knoten des Baums, z. B. um eine numerische GID durch einen neuen Gruppennamen zu ersetzen */
+    allNodes(): FileSystemNodeModel[] {
+        const result: FileSystemNodeModel[] = [];
+        const visit = (node: FileSystemNodeModel) => {
+            result.push(node);
+            for (const child of Object.values(node.children ?? {})) visit(child);
+        };
+        visit(this.root);
+        return result;
     }
 
     /** Primärgruppe zuerst, danach alle weiteren Gruppen */

@@ -1,0 +1,621 @@
+{
+  "id": "uebung3",
+  "label": "Übung 3",
+  "title": "Übung 3: Berechtigungen unter Linux (Klausurübung)",
+  "source": "LS7.1_Uebung_Rechte_Klausur.pdf / LS7.1_Rechte_Uebung_Musterloesung.pdf",
+  "intro": "LF7 – LS1 Einstieg Linuxsysteme · Klausurübung: Rechtesystem und Umsetzung (36 Punkte)\n\n**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Diagramm (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\n**Vorbereitung:** Bevor es an die Multiple-Choice-Aufgaben geht, muss das Szenario erst hergestellt werden (V1–V3). Gruppe `tools`, Benutzer `hklaus` und `/srv/projekte` gibt es am Anfang noch nicht; `/srv/tools` gehört numerisch der GID 2011.\n\n**Aufgaben:** Entscheide für jeden Befehl, ob er funktioniert (Ja/Nein). Bei Aufgabe 3 und 5b zusätzlich begründen.\nBepunktung: je Aufgabe 1 Punkt (richtig) / −1 Punkt (falsch), Teilsumme nicht negativ. Begründungen je 3 Punkte.\n\n**Terminal:** Ab Aufgabe 1 läuft das Terminal auf `lightning` im Zustand nach V1–V3, angemeldet mit der Rolle der Aufgabe – Sie können die Befehle also auch real ausprobieren.",
+  "tasks": [
+    {
+      "id": "u3-v1",
+      "title": "Vorbereitung V1 (2 Punkte)",
+      "category": "users",
+      "type": "terminal",
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "text": "Richte die Gruppe `tools` mit der GID `2011` ein und nimm `bwagner` als Mitglied auf (siehe `/etc/group`-Auszug).\n\nTipp (aus der man-Page): `--gid GID` – When creating a group, this option sets the group ID number of the new group to GID. When creating a user, this option sets the primary group ID number of the new user to GID. (GID = numerische Gruppen-ID, z. B. 2011 – kein Gruppenname.)",
+      "hints": [],
+      "solutions": [
+        "sudo addgroup --gid 2011 tools",
+        "sudo adduser bwagner tools"
+      ],
+      "solutionIsSequence": true,
+      "explanation": "Sobald die Gruppe mit genau der GID 2011 existiert, zeigt `ls -l /srv` bei tools statt `2011` den Namen `tools` an – Linux speichert an der Datei nur die Nummer.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "groupMember",
+            "user": "bwagner",
+            "group": "tools"
+          },
+          {
+            "type": "owner",
+            "path": "/srv/tools",
+            "group": "tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u3-v2",
+      "title": "Vorbereitung V2 (2 + 2 Punkte)",
+      "category": "users",
+      "type": "terminal",
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "cwd": "/srv",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools"
+      ],
+      "text": "Heiko Klaus (`hklaus`) wird neu eingestellt. Lege für ihn einen Benutzeraccount an (siehe `/etc/group`-Auszug – achte auf **alle** Zeilen, in denen hklaus vorkommt).",
+      "hints": [],
+      "solutions": [
+        "sudo adduser hklaus",
+        "sudo adduser hklaus sudo"
+      ],
+      "solutionIsSequence": true,
+      "explanation": "Laut `/etc/group` ist hklaus Mitglied der Gruppe sudo – das muss nach dem Anlegen zusätzlich erledigt werden (`sudo adduser hklaus sudo` oder `sudo usermod -aG sudo hklaus`).",
+      "check": {
+        "type": "groupMember",
+        "user": "hklaus",
+        "group": "sudo"
+      }
+    },
+    {
+      "id": "u3-v3",
+      "title": "Vorbereitung V3 (2 + 4 + 4 Punkte)",
+      "category": "sgid",
+      "type": "terminal",
+      "scenario": "uebung3",
+      "user": "hklaus",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo"
+      ],
+      "text": "`hklaus` legt anschließend das Verzeichnis `/srv/projekte` an und versieht es mit den im Diagramm abgebildeten Zugriffsrechten (Besitzer `root:technik`, Rechte `rwxr-Sr--`).",
+      "hints": [],
+      "solutions": [
+        "sudo mkdir /srv/projekte",
+        "sudo chown root:technik /srv/projekte",
+        "sudo chmod 2744 /srv/projekte"
+      ],
+      "solutionIsSequence": true,
+      "explanation": "Großes `S` = SGID gesetzt, aber **kein** x für die Gruppe → `rwxr-Sr--` = 2744. Die Musterlösung nennt `chmod 2754` – damit hätte die Gruppe r-x und es würde `rwxr-sr--` (kleines s) angezeigt. Beide Varianten werden hier akzeptiert. Für die Multiple-Choice-Aufgaben spielt das keine Rolle, weil schon `/srv` den Zugriff blockiert.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "exists",
+            "path": "/srv/projekte",
+            "nodeType": "directory"
+          },
+          {
+            "type": "owner",
+            "path": "/srv/projekte",
+            "owner": "root",
+            "group": "technik"
+          },
+          {
+            "type": "any",
+            "checks": [
+              {
+                "type": "mode",
+                "path": "/srv/projekte",
+                "mode": "2744"
+              },
+              {
+                "type": "mode",
+                "path": "/srv/projekte",
+                "mode": "2754"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "u3-1",
+      "title": "Aufgabe 1",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd srv\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "`srv` ist ein relativer Pfad – in `/home` gibt es kein Verzeichnis `srv`. Richtig wäre `cd /srv` (und selbst das scheitert für mkeller am fehlenden x der Gruppe technik auf /srv).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/home"
+    },
+    {
+      "id": "u3-2",
+      "title": "Aufgabe 2",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd bwagner\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Ja"
+      ],
+      "explanation": "`/home/bwagner` hat `rwxr-xr-x` – others haben x, also darf mkeller hineinwechseln. `/home` selbst hat für die Gruppe technik r-x.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Ja"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/home"
+    },
+    {
+      "id": "u3-3",
+      "title": "Aufgabe 3",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/ $ cd /srv/projekte\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "bwagner ist in technik, /srv gibt technik nur `r--`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-3-reason",
+      "title": "Begründung zu Aufgabe 3 (3 Punkte)",
+      "category": "access",
+      "type": "question",
+      "text": "Begründe deine Antwort zu Aufgabe 3 (`bwagner@lightning:/ $ cd /srv/projekte`).",
+      "choices": [
+        "/srv ist für die Gruppe technik nur r-- → kein x. Der Befehl scheitert schon beim Durchqueren von /srv, nicht erst am Ziel /srv/projekte.",
+        "/srv/projekte hat für die Gruppe ein großes S – das bedeutet „gesperrt“.",
+        "bwagner ist nicht in der Gruppe sudo und darf deshalb nicht nach /srv.",
+        "bwagner fehlt auf /srv/projekte das w-Recht."
+      ],
+      "hints": [],
+      "solutions": [
+        "/srv ist für die Gruppe technik nur r-- → kein x. Der Befehl scheitert schon beim Durchqueren von /srv, nicht erst am Ziel /srv/projekte."
+      ],
+      "explanation": "Für jedes Verzeichnis auf dem Weg braucht man x. Die erste fehlende Stelle (/srv) genügt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "/srv ist für die Gruppe technik nur r-- → kein x. Der Befehl scheitert schon beim Durchqueren von /srv, nicht erst am Ziel /srv/projekte."
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-4",
+      "title": "Aufgabe 4",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/home/mkeller $ cd ../../srv/tools\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "Der Pfad führt über `/srv`; dort fehlt bwagner (Gruppe technik) das x. Dass bwagner in tools ist und tools `r-x` für die Gruppe hat, hilft nicht – der Weg ist vorher versperrt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/home/mkeller"
+    },
+    {
+      "id": "u3-5a",
+      "title": "Aufgabe 5a",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls /srv\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Ja"
+      ],
+      "explanation": "Zum reinen Auflisten der Namen genügt r auf /srv – die Gruppe technik hat `r--`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Ja"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-5b",
+      "title": "Aufgabe 5b",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls -l /srv\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "Die Namen werden zwar angezeigt, aber Rechte, Besitzer und Größe erscheinen als `?` mit „Permission denied“.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-5b-reason",
+      "title": "Begründung zu Aufgabe 5b (3 Punkte)",
+      "category": "access",
+      "type": "question",
+      "text": "Begründe deine Antwort zu Aufgabe 5b (`ls -l /srv` als bwagner) – im Unterschied zu 5a (`ls /srv`).",
+      "choices": [
+        "ls -l braucht zusätzlich das x-Recht auf /srv, um die Metadaten der Einträge zu lesen – das fehlt (nur r--). 5a listet nur die Namen, 5b greift auf Dateiattribute zu.",
+        "ls -l braucht w auf /srv, weil es die Zeitstempel aktualisiert.",
+        "ls -l darf nur root ausführen.",
+        "ls -l braucht r auf jeder einzelnen Datei in /srv."
+      ],
+      "hints": [],
+      "solutions": [
+        "ls -l braucht zusätzlich das x-Recht auf /srv, um die Metadaten der Einträge zu lesen – das fehlt (nur r--). 5a listet nur die Namen, 5b greift auf Dateiattribute zu."
+      ],
+      "explanation": "r auf einem Verzeichnis = Namen lesen, x = auf die Einträge (inkl. ihrer Attribute) zugreifen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ls -l braucht zusätzlich das x-Recht auf /srv, um die Metadaten der Einträge zu lesen – das fehlt (nur r--). 5a listet nur die Namen, 5b greift auf Dateiattribute zu."
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-6",
+      "title": "Aufgabe 6",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/srv/projekte $ touch neu.txt\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "Zum Anlegen braucht man x auf dem ganzen Weg (fehlt schon auf /srv) sowie w und x auf /srv/projekte (Gruppe technik hat dort nur `r-S`, also weder w noch x).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/srv/projekte"
+    },
+    {
+      "id": "u3-7",
+      "title": "Aufgabe 7",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: mkeller)\n```\nmkeller@lightning:/srv/projekte $ sudo touch neu.txt\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Ja"
+      ],
+      "explanation": "mkeller ist in der Gruppe sudo. Mit sudo läuft touch als root – root ignoriert die Lese-/Schreibrechte.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Ja"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/srv/projekte"
+    },
+    {
+      "id": "u3-8",
+      "title": "Aufgabe 8",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: mkeller)\n```\nmkeller@lightning:/srv $ cd ~\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Ja"
+      ],
+      "explanation": "`cd ~` wechselt ins eigene Home `/home/mkeller`. Der Weg geht über / und /home (r-x für technik) – dort hat mkeller als Besitzer `rwx`. Wo man gerade steht, spielt keine Rolle.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Ja"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/srv"
+    },
+    {
+      "id": "u3-9",
+      "title": "Aufgabe 9",
+      "category": "access",
+      "type": "question",
+      "text": "Funktioniert der Befehl? (Rolle: bwagner)\n```\nbwagner@lightning:/ $ sudo cd /srv/projekte\n```",
+      "choices": [
+        "Ja",
+        "Nein"
+      ],
+      "hints": [],
+      "solutions": [
+        "Nein"
+      ],
+      "explanation": "bwagner ist **nicht** in der Gruppe sudo (`bwagner is not in the sudoers file`). Außerdem ist `cd` in die Shell eingebaut – `sudo cd` geht selbst für sudo-Mitglieder nicht (`sudo: cd: command not found`).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nein"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "bwagner",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ],
+      "cwd": "/"
+    },
+    {
+      "id": "u3-z1-observe",
+      "title": "Zusatzaufgabe Z1 (4 Punkte)",
+      "category": "access",
+      "type": "question",
+      "text": "Analysiere den Screenshot – fällt dir etwas bei den Zugriffsrechten auf?\n```\nmkeller@lightning:~ $ ls -ld /tmp\ndrwxrwxrwt 14 root root 4096 Nov  9 22:03 /tmp\nmkeller@lightning:~ $ touch /tmp/test.txt\nmkeller@lightning:~ $ ls -l /tmp/test.txt\n-rw-r--r-- 1 mkeller mkeller 0 Nov  9 22:03 /tmp/test.txt\nmkeller@lightning:~ $ su - bwagner\nPassword:\nbwagner@lightning:~ $ rm /tmp/test.txt\nrm: cannot remove '/tmp/test.txt': Operation not permitted\n```\nWas steckt dahinter?",
+      "choices": [
+        "Das t am Ende von rwxrwxrwt ist das Sticky-Bit: Jeder darf in /tmp anlegen, aber nur der Eigentümer der Datei (bzw. root oder der Verzeichnis-Eigentümer) darf sie löschen oder umbenennen.",
+        "Das t steht für „temporär“: Dateien in /tmp werden beim Neustart gelöscht und sind bis dahin schreibgeschützt.",
+        "bwagner fehlt das w-Recht auf test.txt (rw-r--r--), deshalb darf er sie nicht löschen.",
+        "Das t ist das SGID-Bit: neue Dateien erben die Gruppe root."
+      ],
+      "hints": [],
+      "solutions": [
+        "Das t am Ende von rwxrwxrwt ist das Sticky-Bit: Jeder darf in /tmp anlegen, aber nur der Eigentümer der Datei (bzw. root oder der Verzeichnis-Eigentümer) darf sie löschen oder umbenennen."
+      ],
+      "explanation": "Ohne Sticky-Bit dürfte bwagner die Datei löschen, denn Löschen hängt nur von w+x am Verzeichnis ab (hier rwx für others). Das Sticky-Bit verhindert genau das. Quelle: `man chmod` (Abschnitt „sticky bit“), https://man7.org/linux/man-pages/man1/chmod.1.html",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Das t am Ende von rwxrwxrwt ist das Sticky-Bit: Jeder darf in /tmp anlegen, aber nur der Eigentümer der Datei (bzw. root oder der Verzeichnis-Eigentümer) darf sie löschen oder umbenennen."
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ]
+    },
+    {
+      "id": "u3-z1-set",
+      "title": "Zusatzaufgabe Z1",
+      "category": "access",
+      "type": "question",
+      "text": "Wie setzt man das Sticky-Bit auf einem Verzeichnis, sodass es wie `/tmp` aussieht (`drwxrwxrwt`)? Nenne die oktale Rechteangabe für `chmod`.",
+      "hints": [],
+      "solutions": [
+        "1777"
+      ],
+      "explanation": "Führende 1 vor den klassischen drei Ziffern = Sticky-Bit: `chmod 1777 verzeichnis` (symbolisch `chmod +t verzeichnis`).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "1777",
+          "chmod 1777"
+        ]
+      },
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "addgroup --gid 2011 tools",
+        "adduser bwagner tools",
+        "adduser hklaus",
+        "adduser hklaus sudo",
+        "mkdir /srv/projekte",
+        "chown root:technik /srv/projekte",
+        "chmod 2744 /srv/projekte"
+      ]
+    },
+    {
+      "id": "u3-z1-try",
+      "title": "Zusatzaufgabe Z1 – am Pi nachprüfen",
+      "category": "access",
+      "type": "terminal",
+      "scenario": "uebung3",
+      "user": "mkeller",
+      "setup": [
+        "mkdir /srv/tausch",
+        "chmod 777 /srv/tausch"
+      ],
+      "text": "Überprüfe das Verhalten selbst: Unter `/srv/tausch` liegt ein Verzeichnis mit `rwxrwxrwx` (ohne Sticky-Bit). Setze als `mkeller` das Sticky-Bit, sodass es danach `drwxrwxrwt` zeigt.",
+      "hints": [],
+      "solutions": [
+        "sudo chmod +t /srv/tausch",
+        "sudo chmod 1777 /srv/tausch"
+      ],
+      "explanation": "/srv/tausch gehört root → sudo nötig. `+t` setzt nur das Sticky-Bit, `1777` setzt alles neu.",
+      "check": {
+        "type": "mode",
+        "path": "/srv/tausch",
+        "mode": "1777"
+      }
+    }
+  ]
+}

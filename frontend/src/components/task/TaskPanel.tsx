@@ -44,13 +44,13 @@ export default function TaskPanel(props: Readonly<TaskPanelProps>) {
                 <span className="task-position">{position}</span>
             </header>
 
-            <p className="task-text">
+            <div className="task-text">
                 <TaskFormattedText text={task.text} />
-            </p>
+            </div>
             <p className="task-muted">
                 {task.type === "terminal"
                     ? "Löse die Aufgabe im Terminal unten. Geprüft wird nach jedem Befehl."
-                    : "Antworte unten. Das Terminal kannst du zum Nachsehen benutzen."}
+                    : "Antworte oben. Im Terminal unten kannst du nachsehen und ausprobieren."}
             </p>
 
             {status === "open" && task.type === "question" && (

@@ -54,3 +54,29 @@
         font-size: 14px;
     }
 }
+
+/* Buttons für die Probeklausuren */
+.navbar-exams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.navbar-exams a {
+    padding: 5px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+}
+
+.navbar-exams a:hover {
+    background: var(--accent-soft);
+}
+
+.navbar-exams a[aria-current="page"] {
+    color: var(--accent-text);
+    background: var(--accent);
+}

@@ -3,7 +3,7 @@ import type { ShellStateModel } from "../../models/ShellStateModel.ts";
 import { tokenize } from "../CommandParser.ts";
 import { resolvePath } from "../filesystem/PathResolver.ts";
 import { errorMessage } from "../filesystem/VirtualFileSystem.ts";
-import { adduserCommand } from "./AdduserCommand.ts";
+import { addgroupCommand, adduserCommand } from "./AdduserCommand.ts";
 import { catCommand } from "./CatCommand.ts";
 import { cdCommand } from "./CdCommand.ts";
 import { chgrpCommand } from "./ChgrpCommand.ts";
@@ -36,6 +36,7 @@ import { usermodCommand } from "./UsermodCommand.ts";
 import { whoamiCommand } from "./WhoamiCommand.ts";
 
 const COMMANDS: Record<string, Command> = {
+    addgroup: addgroupCommand,
     adduser: adduserCommand,
     cat: catCommand,
     cd: cdCommand,

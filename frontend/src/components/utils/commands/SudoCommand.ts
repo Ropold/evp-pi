@@ -44,6 +44,8 @@ export const sudoCommand: Command = (args, state) => {
         return { lines: [] };
     }
     if (rest.length === 0) return { lines: USAGE };
+    // cd ist in die Shell eingebaut, sudo findet dafür kein Programm
+    if (rest[0] === "cd") return { lines: ["sudo: cd: command not found"] };
 
     return runAs(state, targetUser, rest[0], rest.slice(1));
 };

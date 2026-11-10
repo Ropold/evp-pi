@@ -1,4 +1,5 @@
 import "./styles/Navbar.css";
+import { EXAM_SETS } from "./utils/ExamSets.ts";
 
 type NavbarProps = {
     route: string;
@@ -19,6 +20,18 @@ export default function Navbar({ route }: Readonly<NavbarProps>) {
             <a className="navbar-brand" href="#/">
                 <span aria-hidden="true">&gt;_</span> Linux-Kannliste
             </a>
+            <div className="navbar-exams" role="group" aria-label="Probeklausuren">
+                {EXAM_SETS.map((set) => (
+                    <a
+                        key={set.id}
+                        href={`#/${set.id}`}
+                        title={set.title}
+                        aria-current={route === `/${set.id}` ? "page" : undefined}
+                    >
+                        {set.label}
+                    </a>
+                ))}
+            </div>
             <ul className="navbar-links">
                 {LINKS.map((link) => (
                     <li key={link.route}>

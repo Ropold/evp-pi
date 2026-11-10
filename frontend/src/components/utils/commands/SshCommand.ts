@@ -20,7 +20,7 @@ export const sshCommand: Command = (args, state) => {
     openSession(state, user, "ssh");
     return {
         lines: [
-            "Welcome to pi (simuliertes Ubuntu, kein Passwort nötig)",
+            `Welcome to ${state.fs.hostname} (simuliertes Linux, kein Passwort nötig)`,
             "",
             `Angemeldet als ${user}. Mit exit zurück.`,
         ],

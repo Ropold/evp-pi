@@ -17,4 +17,6 @@ export type TaskCheckModel =
     | { type: "command"; pattern: string }
     /** Antwort auf eine Frage, Groß/Klein und Leerzeichen egal */
     | { type: "answer"; accepted: string[] }
-    | { type: "all"; checks: TaskCheckModel[] };
+    | { type: "all"; checks: TaskCheckModel[] }
+    /** Mindestens eine der Prüfungen muss stimmen */
+    | { type: "any"; checks: TaskCheckModel[] };

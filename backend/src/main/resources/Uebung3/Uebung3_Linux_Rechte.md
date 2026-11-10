@@ -310,5 +310,6 @@ Was das Skript macht:
 | 4 | `/home` → `root:technik`, 755 · `/srv` → `root:technik`, 754 · `/srv/tools` → `root:2011`, 755 |
 | 5 | Verifikation per `getent group` und `ls -ld` |
 
+- ⚠️ Fehler im Skript: `/srv` wird mit `chmod 754` gesetzt, laut Kommentar und Diagramm soll es aber `rwxr--r--` sein – das ist `744`. Mit `754` (`rwxr-xr--`) hätte die Gruppe technik doch `x`, und die Aufgaben 3, 4, 5b und 6 würden anders ausgehen. Richtig: `chmod 744 /srv`.
 - Startpasswort aller Accounts: `asdf` (über die Umgebungsvariable `DEFAULT_PASSWORD` änderbar).
 - Mehrfaches Ausführen ist unschädlich (idempotent): vorhandene Nutzer/Gruppen werden übersprungen, Verzeichnisrechte jedes Mal neu gesetzt.

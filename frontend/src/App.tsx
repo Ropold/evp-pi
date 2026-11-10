@@ -6,6 +6,8 @@ import Navbar from "./components/Navbar.tsx";
 import NotFound from "./components/NotFound.tsx";
 import Content from "./components/practice/Content.tsx";
 import Exam from "./components/practice/Exam.tsx";
+import ExamSet from "./components/practice/ExamSet.tsx";
+import { findExamSet } from "./components/utils/ExamSets.ts";
 import Practice from "./components/practice/Practice.tsx";
 import ProgressOverview from "./components/practice/ProgressOverview.tsx";
 import TerminalFreeMode from "./components/terminal/TerminalFreeMode.tsx";
@@ -30,8 +32,10 @@ function renderPage(route: string) {
             return <ProgressOverview />;
         case "/terminal":
             return <TerminalFreeMode />;
-        default:
-            return <NotFound />;
+        default: {
+            const set = findExamSet(route.slice(1));
+            return set ? <ExamSet set={set} /> : <NotFound />;
+        }
     }
 }
 

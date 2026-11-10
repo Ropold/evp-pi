@@ -1,0 +1,2950 @@
+{
+  "id": "uebung2",
+  "label": "Übung 2",
+  "title": "Übung 2: Linux-Rechteverwaltung Schritt für Schritt",
+  "source": "Uebung2_Linux_Rechte_Aufgaben.pdf / Uebung2_Linux_Rechte_Musterloesung.pdf",
+  "intro": "**Hinweise**\n• Schreiben Sie alle Befehle vollständig und exakt auf (Befehl, Optionen, Argumente).\n• Verwenden Sie `sudo` nur dort, wo es nötig ist.\n• Rechte für others sollen Sie nur öffnen, wenn es ausdrücklich verlangt wird.\n• Wenn nichts anderes steht, arbeiten Sie als Benutzer `tim`.\n• Die Übung besteht aus sieben Teilen, die aufeinander aufbauen. Die Gruppenänderungen aus Teil 2 gelten bis zum Ende. Teile, die eine eigene Ausgangslage nennen, beginnen mit diesem Zustand.\n\n**Ausgangslage**\nDie Firma NetzWerk GmbH betreibt den Linux-Server `srv01`. Dort liegen die Projektdaten unter `/srv/projekt`. Sie sind Praktikant `tim` und arbeiten von Ihrem Windows-Client aus.\n```\nBenutzer  Rolle                  Gruppen\nanna      Projektleiterin        anna, projekt\nben       Entwickler             ben, projekt\ncarla     externe Mitarbeiterin  carla, extern\ntim       Sie (Praktikant)       siehe Aufgabe 2\n```\nJeder Benutzer hat eine Primärgruppe mit seinem Benutzernamen. Die Standard-umask von `tim` ist `0027`, für alle anderen Benutzer gilt `0022`. Auf dem Server ist kein SGID-Bit gesetzt, wenn es nicht ausdrücklich genannt wird. Von den vier Benutzern darf nur `tim` `sudo` verwenden.\n\n**Terminal:** Bei jeder Aufgabe läuft unten ein Terminal auf `srv01` im Zustand des jeweiligen Teils. Dort können Sie nachsehen (`ls -l`, `ls -ld`, `id`, `ping` …) und als tim mit `sudo su - ben` auch die Sicht anderer Benutzer testen.",
+  "tasks": [
+    {
+      "id": "u2-1a-ping",
+      "title": "Teil 1 · Aufgabe 1a",
+      "category": "login",
+      "type": "question",
+      "text": "Sie sitzen an Ihrem Windows-Client und prüfen zuerst, ob der Server erreichbar ist.\n```\nC:\\Users\\praktikant> ping srv01\n\nPing wird ausgeführt für srv01.netzwerk.lan [192.168.10.5] mit 32 Bytes Daten:\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\n\nPing-Statistik für 192.168.10.5:\n    Pakete: Gesendet = 4, Empfangen = 4, Verloren = 0 (0% Verlust)\n```\nIst `srv01` erreichbar? Wird der Name aufgelöst?",
+      "choices": [
+        "Erreichbar und der Name wird aufgelöst (4 gesendet, 4 empfangen; aus srv01 wird srv01.netzwerk.lan [192.168.10.5])",
+        "Erreichbar, aber der Name wird nicht aufgelöst (es wird nur mit der IP gearbeitet)",
+        "Der Name wird aufgelöst, aber srv01 ist nicht erreichbar",
+        "Nicht erreichbar, weil TTL=64 zu niedrig ist"
+      ],
+      "hints": [],
+      "solutions": [
+        "Erreichbar und der Name wird aufgelöst (4 gesendet, 4 empfangen; aus srv01 wird srv01.netzwerk.lan [192.168.10.5])"
+      ],
+      "explanation": "4 Pakete gesendet, 4 empfangen, 0 % Verlust → erreichbar. Der Name wurde per DNS aufgelöst: aus `srv01` wurde `srv01.netzwerk.lan [192.168.10.5]`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Erreichbar und der Name wird aufgelöst (4 gesendet, 4 empfangen; aus srv01 wird srv01.netzwerk.lan [192.168.10.5])"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-1a-ip",
+      "title": "Teil 1 · Aufgabe 1a",
+      "category": "login",
+      "type": "question",
+      "text": "Sie sitzen an Ihrem Windows-Client und prüfen zuerst, ob der Server erreichbar ist.\n```\nC:\\Users\\praktikant> ping srv01\n\nPing wird ausgeführt für srv01.netzwerk.lan [192.168.10.5] mit 32 Bytes Daten:\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\n\nPing-Statistik für 192.168.10.5:\n    Pakete: Gesendet = 4, Empfangen = 4, Verloren = 0 (0% Verlust)\n```\nNennen Sie die IP-Adresse von `srv01`.",
+      "hints": [],
+      "solutions": [
+        "192.168.10.5"
+      ],
+      "explanation": "Die IP steht in eckigen Klammern hinter dem aufgelösten Namen: `srv01.netzwerk.lan [192.168.10.5]`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "192.168.10.5"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-1a-ttl",
+      "title": "Teil 1 · Aufgabe 1a",
+      "category": "login",
+      "type": "question",
+      "text": "Sie sitzen an Ihrem Windows-Client und prüfen zuerst, ob der Server erreichbar ist.\n```\nC:\\Users\\praktikant> ping srv01\n\nPing wird ausgeführt für srv01.netzwerk.lan [192.168.10.5] mit 32 Bytes Daten:\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\n\nPing-Statistik für 192.168.10.5:\n    Pakete: Gesendet = 4, Empfangen = 4, Verloren = 0 (0% Verlust)\n```\nAuf welches Betriebssystem deutet der Wert `TTL=64` hin?",
+      "choices": [
+        "Linux",
+        "Windows",
+        "Das lässt sich aus der TTL nicht ableiten"
+      ],
+      "hints": [],
+      "solutions": [
+        "Linux"
+      ],
+      "explanation": "Die TTL sinkt bei jedem Router um 1. Client und Server stehen im selben Netz, daher bleibt der Startwert sichtbar: 64 bei Linux, 128 bei Windows.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Linux"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-1b-name",
+      "title": "Teil 1 · Aufgabe 1b",
+      "category": "login",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Melden Sie sich als `tim` per Secure Shell auf `srv01` an – **mit dem Rechnernamen**.",
+      "hints": [],
+      "solutions": [
+        "ssh tim@srv01"
+      ],
+      "explanation": "`ssh benutzer@rechner` baut eine verschlüsselte Verbindung (Port 22) auf. Beim ersten Mal fragt SSH nach dem Fingerabdruck des Servers, danach nach dem Passwort.",
+      "check": {
+        "type": "command",
+        "pattern": "^ssh tim@srv01$"
+      }
+    },
+    {
+      "id": "u2-1b-ip",
+      "title": "Teil 1 · Aufgabe 1b",
+      "category": "login",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Melden Sie sich als `tim` per Secure Shell auf `srv01` an – diesmal **mit der IP-Adresse**.",
+      "hints": [],
+      "solutions": [
+        "ssh tim@192.168.10.5"
+      ],
+      "explanation": "Statt des Namens geht immer auch die IP-Adresse: `ssh tim@192.168.10.5`.",
+      "check": {
+        "type": "command",
+        "pattern": "^ssh tim@192\\.168\\.10\\.5$"
+      }
+    },
+    {
+      "id": "u2-1c-prompt",
+      "title": "Teil 1 · Aufgabe 1c",
+      "category": "login",
+      "type": "question",
+      "text": "Nach der Anmeldung zeigt das Terminal den Prompt `tim@srv01:~$`. Wofür stehen die Teile `tim`, `srv01`, `~` und `$`?",
+      "choices": [
+        "angemeldeter Benutzer · Rechnername · aktuelles Verzeichnis (hier Home) · normaler Benutzer (bei root steht #)",
+        "angemeldeter Benutzer · Domäne · Wurzelverzeichnis · Administrator",
+        "Rechnername · angemeldeter Benutzer · Home-Verzeichnis von root · Variable",
+        "Gruppe · Rechnername · aktuelles Verzeichnis · Eingabe als root"
+      ],
+      "hints": [],
+      "solutions": [
+        "angemeldeter Benutzer · Rechnername · aktuelles Verzeichnis (hier Home) · normaler Benutzer (bei root steht #)"
+      ],
+      "explanation": "Der Prompt hat die Form `benutzer@rechner:verzeichnis$`. `~` ist das Home-Verzeichnis, `$` ein normaler Benutzer, `#` wäre root.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "angemeldeter Benutzer · Rechnername · aktuelles Verzeichnis (hier Home) · normaler Benutzer (bei root steht #)"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-1d-man",
+      "title": "Teil 1 · Aufgabe 1d",
+      "category": "login",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Sie wissen nicht mehr, wie `chown` verwendet wird. Lassen Sie sich die **ausführliche Handbuchseite** anzeigen.",
+      "hints": [],
+      "solutions": [
+        "man chown"
+      ],
+      "explanation": "`man chown` öffnet die Handbuchseite (Beenden mit `q`).",
+      "check": {
+        "type": "command",
+        "pattern": "^man chown$"
+      }
+    },
+    {
+      "id": "u2-1d-help",
+      "title": "Teil 1 · Aufgabe 1d",
+      "category": "login",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Sie wissen nicht mehr, wie `chown` verwendet wird. Zweite Möglichkeit: Lassen Sie sich die **Kurzhilfe** zu `chown` anzeigen.",
+      "hints": [],
+      "solutions": [
+        "chown --help"
+      ],
+      "explanation": "`chown --help` zeigt eine Kurzfassung der Syntax.",
+      "check": {
+        "type": "command",
+        "pattern": "^chown --help$"
+      }
+    },
+    {
+      "id": "u2-1e-ls",
+      "title": "Teil 1 · Aufgabe 1e",
+      "category": "login",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Sie lesen den folgenden Auszug aus der Kurzhilfe.\n```\ntim@srv01:~$ ls --help\nAufruf: ls [OPTION]... [DATEI]...\nAuflistung der DATEIen (standardmäßig das aktuelle Verzeichnis).\n\n  -a, --all        Einträge, die mit . beginnen, nicht ignorieren\n  -d, --directory  Verzeichnisse selbst auflisten, nicht deren Inhalt\n  -l               ausführliches Listenformat verwenden\n```\nZeigen Sie alle Einträge des aktuellen Verzeichnisses einschließlich der versteckten im ausführlichen Listenformat an.",
+      "hints": [],
+      "solutions": [
+        "ls -la",
+        "ls -al",
+        "ls -l -a"
+      ],
+      "explanation": "Dateien, deren Name mit einem Punkt beginnt, sind versteckt und erscheinen erst mit `-a`. Mehrere Optionen darf man zusammenschreiben (`-la`).",
+      "check": {
+        "type": "command",
+        "pattern": "^ls (-la|-al|-l -a|-a -l)$"
+      }
+    },
+    {
+      "id": "u2-2a-ids",
+      "title": "Teil 2 · Aufgabe 2a",
+      "category": "users",
+      "type": "question",
+      "text": "Nach der Anmeldung geben Sie `id` ein und lassen sich außerdem die Gruppen von `carla` anzeigen.\n```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```\nWelche UID und welche GID hat `tim`? (Antwort: UID, GID)",
+      "hints": [],
+      "solutions": [
+        "1004, 1004"
+      ],
+      "explanation": "uid=1004(tim) gid=1004(tim): UID 1004, GID 1004.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "1004, 1004",
+          "uid 1004 gid 1004",
+          "uid=1004 gid=1004",
+          "1004/1004"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2a-groups",
+      "title": "Teil 2 · Aufgabe 2a",
+      "category": "users",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```\nWie heißt tims Primärgruppe, welche weitere Gruppe hat er? (Antwort: Primärgruppe, weitere Gruppe)",
+      "hints": [],
+      "solutions": [
+        "tim, sudo"
+      ],
+      "explanation": "Die Primärgruppe steht bei `gid=` (tim). Weitere Gruppe: sudo.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "tim, sudo",
+          "tim sudo"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2b-sudo",
+      "title": "Teil 2 · Aufgabe 2b",
+      "category": "users",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```\nWas bedeutet die Mitgliedschaft in der Gruppe `sudo` für `tim`?",
+      "choices": [
+        "tim darf Befehle mit vorangestelltem sudo mit Administratorrechten (root) ausführen",
+        "tim ist dadurch selbst root und braucht nie ein Passwort",
+        "tim darf die Dateien aller Benutzer auch ohne sudo lesen",
+        "tim darf nur Benutzer anlegen, aber keine Rechte ändern"
+      ],
+      "hints": [],
+      "solutions": [
+        "tim darf Befehle mit vorangestelltem sudo mit Administratorrechten (root) ausführen"
+      ],
+      "explanation": "Mitglieder der Gruppe sudo dürfen Befehle mit `sudo` als root ausführen. Ohne `sudo` hat tim nur seine normalen Rechte.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "tim darf Befehle mit vorangestelltem sudo mit Administratorrechten (root) ausführen"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2c-carla",
+      "title": "Teil 2 · Aufgabe 2c",
+      "category": "users",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```\nWie heißt carlas Primärgruppe, wie ihre weitere Gruppe? (Antwort: Primärgruppe, weitere Gruppe)",
+      "hints": [],
+      "solutions": [
+        "carla, extern"
+      ],
+      "explanation": "gid=1003(carla) → Primärgruppe carla, weitere Gruppe extern.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "carla, extern",
+          "carla extern"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2c-ben",
+      "title": "Teil 2 · Aufgabe 2c",
+      "category": "users",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Lassen Sie sich die Gruppen von `ben` anzeigen.",
+      "hints": [],
+      "solutions": [
+        "id ben"
+      ],
+      "explanation": "`id ben` zeigt UID, GID und alle Gruppen von ben (`groups ben` nur die Namen).",
+      "check": {
+        "type": "command",
+        "pattern": "^(id|groups) ben$"
+      }
+    },
+    {
+      "id": "u2-2d-primary",
+      "title": "Teil 2 · Aufgabe 2d",
+      "category": "users",
+      "type": "question",
+      "text": "Erklären Sie den Unterschied zwischen Primärgruppe und weiteren Gruppen. Welche Gruppe erhält eine neu angelegte Datei normalerweise?",
+      "choices": [
+        "Die Primärgruppe ist die Standardgruppe (gid) – neue Dateien erhalten sie. Weitere Gruppen geben nur zusätzliche Zugriffsrechte.",
+        "Weitere Gruppen sind die Standardgruppen – neue Dateien erhalten die zuletzt hinzugefügte Gruppe.",
+        "Die Primärgruppe hat mehr Rechte als weitere Gruppen – neue Dateien gehören immer der Gruppe root.",
+        "Es gibt keinen Unterschied – neue Dateien erhalten zufällig eine der Gruppen."
+      ],
+      "hints": [],
+      "solutions": [
+        "Die Primärgruppe ist die Standardgruppe (gid) – neue Dateien erhalten sie. Weitere Gruppen geben nur zusätzliche Zugriffsrechte."
+      ],
+      "explanation": "Benutzer stehen in `/etc/passwd`, Gruppen in `/etc/group`. Die Primärgruppe (gid) bekommen neue Dateien, solange kein SGID-Bit am Ordner gesetzt ist.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Die Primärgruppe ist die Standardgruppe (gid) – neue Dateien erhalten sie. Weitere Gruppen geben nur zusätzliche Zugriffsrechte."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2e-projekt",
+      "title": "Teil 2 · Aufgabe 2e",
+      "category": "users",
+      "type": "question",
+      "text": "```\nBenutzer  Rolle                  Gruppen\nanna      Projektleiterin        anna, projekt\nben       Entwickler             ben, projekt\ncarla     externe Mitarbeiterin  carla, extern\ntim       Sie (Praktikant)       siehe Aufgabe 2\n```\nWerten Sie die Tabelle der Ausgangslage aus: Wer ist Mitglied der Gruppe `projekt`?",
+      "hints": [],
+      "solutions": [
+        "anna, ben"
+      ],
+      "explanation": "Laut Tabelle: anna (anna, projekt) und ben (ben, projekt). tim noch nicht – das kommt in Aufgabe 3.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "anna, ben",
+          "ben, anna",
+          "anna und ben",
+          "ben und anna"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-2e-extern",
+      "title": "Teil 2 · Aufgabe 2e",
+      "category": "users",
+      "type": "question",
+      "text": "```\nBenutzer  Rolle                  Gruppen\nanna      Projektleiterin        anna, projekt\nben       Entwickler             ben, projekt\ncarla     externe Mitarbeiterin  carla, extern\ntim       Sie (Praktikant)       siehe Aufgabe 2\n```\nWerten Sie die Tabelle der Ausgangslage aus: Wer ist Mitglied der Gruppe `extern`?",
+      "hints": [],
+      "solutions": [
+        "carla"
+      ],
+      "explanation": "Nur carla (carla, extern).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "carla"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-3a-adduser",
+      "title": "Teil 2 · Aufgabe 3a",
+      "category": "users",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "text": "Damit Sie als Praktikant mit den Projektdaten arbeiten können, soll `tim` Mitglied der Gruppe `projekt` werden. Erledigen Sie das **mit adduser**.",
+      "hints": [],
+      "solutions": [
+        "sudo adduser tim projekt"
+      ],
+      "explanation": "`sudo adduser tim projekt` (gleichwertig `sudo usermod -aG projekt tim` oder `sudo addgroup tim projekt`). Ab hier gilt: tim ist Mitglied in projekt.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "groupMember",
+            "user": "tim",
+            "group": "projekt"
+          },
+          {
+            "type": "command",
+            "pattern": "^sudo adduser tim projekt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-3b-why-sudo",
+      "title": "Teil 2 · Aufgabe 3b",
+      "category": "users",
+      "type": "question",
+      "text": "Damit Sie mit den Projektdaten arbeiten können, wird `tim` mit `sudo adduser tim projekt` Mitglied der Gruppe `projekt`.\nWarum ist hier `sudo` nötig?",
+      "choices": [
+        "Die Gruppenverwaltung ändert Systemdateien (/etc/group) – das darf nur root. tim ist in der Gruppe sudo und kann deshalb sudo verwenden.",
+        "adduser ist ein gefährlicher Befehl und deshalb für alle Benutzer gesperrt.",
+        "Ohne sudo würde tim nur seine Primärgruppe ändern.",
+        "Weil tim noch nicht Mitglied von projekt ist und sich nur mit sudo selbst einladen kann."
+      ],
+      "hints": [],
+      "solutions": [
+        "Die Gruppenverwaltung ändert Systemdateien (/etc/group) – das darf nur root. tim ist in der Gruppe sudo und kann deshalb sudo verwenden."
+      ],
+      "explanation": "Gruppenmitgliedschaften stehen in `/etc/group`. Diese Datei darf nur root ändern.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Die Gruppenverwaltung ändert Systemdateien (/etc/group) – das darf nur root. tim ist in der Gruppe sudo und kann deshalb sudo verwenden."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-3c-relogin",
+      "title": "Teil 2 · Aufgabe 3c",
+      "category": "users",
+      "type": "question",
+      "text": "Direkt nach `sudo adduser tim projekt` geben Sie in derselben Sitzung `id` ein. Die Gruppe `projekt` steht noch nicht in der Liste. Erklären Sie, warum, und sagen Sie, was Sie tun müssen.",
+      "choices": [
+        "Gruppen werden beim Anmelden gelesen – die laufende Shell kennt die alte Liste. tim muss sich abmelden (exit) und neu mit ssh tim@srv01 anmelden.",
+        "Die Änderung wird erst nach einigen Minuten übernommen – einfach warten.",
+        "Der Server muss neu gestartet werden.",
+        "id zeigt nur Gruppen an, die mit sudo hinzugefügt wurden – man muss sudo id eingeben."
+      ],
+      "hints": [],
+      "solutions": [
+        "Gruppen werden beim Anmelden gelesen – die laufende Shell kennt die alte Liste. tim muss sich abmelden (exit) und neu mit ssh tim@srv01 anmelden."
+      ],
+      "explanation": "Die Änderung steht sofort in `/etc/group`, aber bereits laufende Prozesse behalten ihre Gruppenliste.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Gruppen werden beim Anmelden gelesen – die laufende Shell kennt die alte Liste. tim muss sich abmelden (exit) und neu mit ssh tim@srv01 anmelden."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-3d-check",
+      "title": "Teil 2 · Aufgabe 3d",
+      "category": "users",
+      "type": "question",
+      "text": "tim wurde mit `sudo adduser tim projekt` in die Gruppe `projekt` (GID 1010) aufgenommen und hat sich neu angemeldet. Woran erkennen Sie, dass die Änderung wirksam ist? Welche Ausgabe von `id` erwarten Sie?",
+      "choices": [
+        "uid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo),1010(projekt)",
+        "uid=1004(tim) gid=1010(projekt) Gruppen=1010(projekt),27(sudo)",
+        "uid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)",
+        "uid=1010(projekt) gid=1004(tim) Gruppen=1004(tim),27(sudo)"
+      ],
+      "hints": [],
+      "solutions": [
+        "uid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo),1010(projekt)"
+      ],
+      "explanation": "projekt kommt als weitere Gruppe hinzu. Die Primärgruppe (gid) bleibt tim.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "uid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo),1010(projekt)"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-4a-usermod",
+      "title": "Teil 2 · Aufgabe 4a",
+      "category": "users",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt"
+      ],
+      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden, damit er mit carla Dateien austauschen kann. Verwenden Sie dieses Mal **usermod**.",
+      "hints": [],
+      "solutions": [
+        "sudo usermod -aG extern ben"
+      ],
+      "explanation": "`sudo usermod -aG extern ben` hängt extern an bens weitere Gruppen an, projekt bleibt erhalten.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "groupMember",
+            "user": "ben",
+            "group": "extern"
+          },
+          {
+            "type": "groupMember",
+            "user": "ben",
+            "group": "projekt"
+          },
+          {
+            "type": "command",
+            "pattern": "^sudo usermod "
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-4b-append",
+      "title": "Teil 2 · Aufgabe 4b",
+      "category": "users",
+      "type": "question",
+      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden: `sudo usermod -aG extern ben`.\nWofür steht die Option `-a`? Was würde ohne diese Option passieren?",
+      "choices": [
+        "-a = anhängen (append). Ohne -a wird die Liste ersetzt: ben wäre nur noch in extern, nicht mehr in projekt, und verliert den Zugriff auf die Projektdaten.",
+        "-a = all. Ohne -a kommt ben nur in die erste genannte Gruppe.",
+        "-a = admin. Ohne -a darf usermod nur root ausführen.",
+        "-a = automatisch. Ohne -a muss ben die Mitgliedschaft erst bestätigen."
+      ],
+      "hints": [],
+      "solutions": [
+        "-a = anhängen (append). Ohne -a wird die Liste ersetzt: ben wäre nur noch in extern, nicht mehr in projekt, und verliert den Zugriff auf die Projektdaten."
+      ],
+      "explanation": "`-G` nennt die weiteren Gruppen, `-a` hängt sie an. Ohne `-a` ersetzt `-G` die gesamte Liste.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "-a = anhängen (append). Ohne -a wird die Liste ersetzt: ben wäre nur noch in extern, nicht mehr in projekt, und verliert den Zugriff auf die Projektdaten."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-4c-sudo-id",
+      "title": "Teil 2 · Aufgabe 4c",
+      "category": "users",
+      "type": "question",
+      "text": "Ein Kollege sagt: „Ich setze vor jeden Befehl sudo, dann geht immer alles.“ Sie wollen nur Bens Gruppen ansehen und tippen `sudo id ben`. Beurteilen Sie das.",
+      "choices": [
+        "Überflüssig: id ben braucht keine besonderen Rechte. Fehler wirken mit sudo als root und können Schaden anrichten, und mit sudo angelegte Dateien gehören root.",
+        "Richtig: Ohne sudo zeigt id nur die eigenen Gruppen an.",
+        "Richtig: sudo macht Befehle schneller, weil keine Rechte geprüft werden.",
+        "Falsch, aber nur weil sudo nach dem Passwort fragt – sonst wäre es egal."
+      ],
+      "hints": [],
+      "solutions": [
+        "Überflüssig: id ben braucht keine besonderen Rechte. Fehler wirken mit sudo als root und können Schaden anrichten, und mit sudo angelegte Dateien gehören root."
+      ],
+      "explanation": "Prinzip der minimalen Rechte (Least Privilege): Jeder Befehl bekommt nur so viele Rechte wie nötig.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Überflüssig: id ben braucht keine besonderen Rechte. Fehler wirken mit sudo als root und können Schaden anrichten, und mit sudo angelegte Dateien gehören root."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim"
+    },
+    {
+      "id": "u2-5-archiv-a",
+      "title": "Teil 3 · Aufgabe 5",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku\ninsgesamt 12\ndrwxrwx--- 2 anna projekt 4096 Nov  2 16:48 archiv\n-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt\n-rw-r--r-- 1 anna anna    2048 Nov  3 10:15 konzept.txt\n```\nTragen Sie für **archiv** ein: Typ, Besitzer, Gruppe, Größe (Antwort z. B. `Datei, max, team, 100`)",
+      "hints": [],
+      "solutions": [
+        "Verzeichnis, anna, projekt, 4096"
+      ],
+      "explanation": "`d` = Verzeichnis, Besitzer anna, Gruppe projekt, 4096 Byte (Größe des Verzeichniseintrags, nicht des Inhalts), Datum Nov 2 16:48.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Verzeichnis, anna, projekt, 4096",
+          "Ordner, anna, projekt, 4096",
+          "d, anna, projekt, 4096",
+          "directory, anna, projekt, 4096"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-5-archiv-b",
+      "title": "Teil 3 · Aufgabe 5",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku\ninsgesamt 12\ndrwxrwx--- 2 anna projekt 4096 Nov  2 16:48 archiv\n-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt\n-rw-r--r-- 1 anna anna    2048 Nov  3 10:15 konzept.txt\n```\nTragen Sie für **archiv** die Rechte ein: Besitzer, Gruppe, others (Antwort z. B. `rw-, r--, ---`)",
+      "hints": [],
+      "solutions": [
+        "rwx, rwx, ---"
+      ],
+      "explanation": "Nach dem Typ `d` folgen dreimal drei Zeichen: Besitzer `rwx`, Gruppe `rwx`, others `---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rwx, rwx, ---",
+          "rwxrwx---"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-5-konzept-a",
+      "title": "Teil 3 · Aufgabe 5",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku\ninsgesamt 12\ndrwxrwx--- 2 anna projekt 4096 Nov  2 16:48 archiv\n-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt\n-rw-r--r-- 1 anna anna    2048 Nov  3 10:15 konzept.txt\n```\nTragen Sie für **konzept.txt** ein: Typ, Besitzer, Gruppe, Größe",
+      "hints": [],
+      "solutions": [
+        "Datei, anna, anna, 2048"
+      ],
+      "explanation": "`-` = Datei, Besitzer anna, Gruppe anna, 2048 Byte, Datum Nov 3 10:15.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Datei, anna, anna, 2048",
+          "-, anna, anna, 2048",
+          "file, anna, anna, 2048"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-5-konzept-b",
+      "title": "Teil 3 · Aufgabe 5",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku\ninsgesamt 12\ndrwxrwx--- 2 anna projekt 4096 Nov  2 16:48 archiv\n-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt\n-rw-r--r-- 1 anna anna    2048 Nov  3 10:15 konzept.txt\n```\nTragen Sie für **konzept.txt** die Rechte ein: Besitzer, Gruppe, others",
+      "hints": [],
+      "solutions": [
+        "rw-, r--, r--"
+      ],
+      "explanation": "Besitzer `rw-`, Gruppe `r--`, others `r--`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rw-, r--, r--",
+          "rw-r--r--"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-6-r",
+      "title": "Teil 3 · Aufgabe 6",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Was bedeutet das Recht **r** bei einer Datei und bei einem Verzeichnis?",
+      "choices": [
+        "Datei: Inhalt lesen · Verzeichnis: Inhalt auflisten (Namen der Einträge sehen)",
+        "Datei: Inhalt ändern · Verzeichnis: Einträge anlegen, löschen und umbenennen (mit x)",
+        "Datei: als Programm ausführen · Verzeichnis: hineinwechseln und auf Einträge zugreifen",
+        "Datei: Datei löschen · Verzeichnis: Verzeichnis umbenennen"
+      ],
+      "hints": [],
+      "solutions": [
+        "Datei: Inhalt lesen · Verzeichnis: Inhalt auflisten (Namen der Einträge sehen)"
+      ],
+      "explanation": "Ein Verzeichnis ist eine Liste von Namen. `r` erlaubt, diese Liste zu lesen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Datei: Inhalt lesen · Verzeichnis: Inhalt auflisten (Namen der Einträge sehen)"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-6-w",
+      "title": "Teil 3 · Aufgabe 6",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Was bedeutet das Recht **w** bei einer Datei und bei einem Verzeichnis?",
+      "choices": [
+        "Datei: Inhalt lesen · Verzeichnis: Inhalt auflisten (Namen der Einträge sehen)",
+        "Datei: Inhalt ändern · Verzeichnis: Einträge anlegen, löschen und umbenennen (mit x)",
+        "Datei: als Programm ausführen · Verzeichnis: hineinwechseln und auf Einträge zugreifen",
+        "Datei: Datei löschen · Verzeichnis: Verzeichnis umbenennen"
+      ],
+      "hints": [],
+      "solutions": [
+        "Datei: Inhalt ändern · Verzeichnis: Einträge anlegen, löschen und umbenennen (mit x)"
+      ],
+      "explanation": "Das Löschen einer Datei hängt von den Rechten des Verzeichnisses (`w` und `x`) ab, nicht von den Rechten der Datei.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Datei: Inhalt ändern · Verzeichnis: Einträge anlegen, löschen und umbenennen (mit x)"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-6-x",
+      "title": "Teil 3 · Aufgabe 6",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Was bedeutet das Recht **x** bei einer Datei und bei einem Verzeichnis?",
+      "choices": [
+        "Datei: Inhalt lesen · Verzeichnis: Inhalt auflisten (Namen der Einträge sehen)",
+        "Datei: Inhalt ändern · Verzeichnis: Einträge anlegen, löschen und umbenennen (mit x)",
+        "Datei: als Programm ausführen · Verzeichnis: hineinwechseln und auf Einträge zugreifen",
+        "Datei: Datei löschen · Verzeichnis: Verzeichnis umbenennen"
+      ],
+      "hints": [],
+      "solutions": [
+        "Datei: als Programm ausführen · Verzeichnis: hineinwechseln und auf Einträge zugreifen"
+      ],
+      "explanation": "`x` erlaubt, durch das Verzeichnis „hindurchzugehen“.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Datei: als Programm ausführen · Verzeichnis: hineinwechseln und auf Einträge zugreifen"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-7-octal",
+      "title": "Teil 3 · Aufgabe 7",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Rechnen Sie in die oktale Schreibweise um: `rwxr-x---`, `rw-r-----`, `rwxrwxr-x` (Antwort mit Komma getrennt)",
+      "hints": [],
+      "solutions": [
+        "750, 640, 775"
+      ],
+      "explanation": "r = 4, w = 2, x = 1. `rwxr-x---`: 4+2+1 = 7, 4+0+1 = 5, 0 → 750. `rw-r-----` → 640. `rwxrwxr-x` → 775.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "750, 640, 775"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-7-symbolic",
+      "title": "Teil 3 · Aufgabe 7",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Rechnen Sie in die symbolische Schreibweise um: `700`, `644`, `770` (Antwort mit Komma getrennt)",
+      "hints": [],
+      "solutions": [
+        "rwx------, rw-r--r--, rwxrwx---"
+      ],
+      "explanation": "Die drei Ziffern gelten der Reihe nach für Besitzer, Gruppe und others: 700 → `rwx------`, 644 → `rw-r--r--`, 770 → `rwxrwx---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rwx------, rw-r--r--, rwxrwx---"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-8-classes",
+      "title": "Teil 3 · Aufgabe 8",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Betrachten Sie `budget.txt` aus Aufgabe 5 (`-r--rw---- 1 anna projekt`). Berücksichtigen Sie nur die Rechte der Datei selbst, nicht den Weg dorthin.\nWelche Rechtegruppe gilt jeweils für **anna, ben, carla, tim**? (Antwort z. B. `Besitzer, Gruppe, others, Gruppe`)",
+      "hints": [],
+      "solutions": [
+        "Besitzer, Gruppe, others, Gruppe"
+      ],
+      "explanation": "anna ist Besitzerin. ben ist in projekt → Gruppe. carla ist weder noch → others. tim ist seit Aufgabe 3 in projekt → Gruppe.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Besitzer, Gruppe, others, Gruppe",
+          "Besitzer, Gruppe, Andere, Gruppe",
+          "u, g, o, g",
+          "owner, group, others, group"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-8-write",
+      "title": "Teil 3 · Aufgabe 8",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Datei `budget.txt`: `-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`. tim ist seit Aufgabe 3 in `projekt`, ben in `ben, projekt`, carla in `carla, extern`.\nWer von anna, ben, carla und tim darf die Datei **ändern**? (Namen mit Komma getrennt)",
+      "hints": [],
+      "solutions": [
+        "ben, tim"
+      ],
+      "explanation": "anna (Besitzer): `r--` → nein. ben (Gruppe): `rw-` → ja. carla (others): `---` → nein. tim (Gruppe): `rw-` → ja.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben, tim",
+          "tim, ben",
+          "ben und tim",
+          "tim und ben"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-8-anna",
+      "title": "Teil 3 · Aufgabe 8",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "`-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`\nAnna ist ebenfalls Mitglied der Gruppe `projekt`. Warum gelten für sie trotzdem nicht die Rechte `rw-`?",
+      "choices": [
+        "Linux prüft Besitzer → Gruppe → others und wendet nur die erste passende Klasse an. anna ist Besitzerin, also gilt r--. Rechte werden nie zusammengezählt.",
+        "Die Gruppenrechte gelten erst, wenn anna sich neu anmeldet.",
+        "Rechte werden addiert: anna hat r-- + rw- = rw-, darf also schreiben.",
+        "anna ist nicht wirklich in projekt, weil projekt nicht ihre Primärgruppe ist."
+      ],
+      "hints": [],
+      "solutions": [
+        "Linux prüft Besitzer → Gruppe → others und wendet nur die erste passende Klasse an. anna ist Besitzerin, also gilt r--. Rechte werden nie zusammengezählt."
+      ],
+      "explanation": "Deshalb kann ein Besitzer weniger Rechte haben als die Gruppe seiner eigenen Datei.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Linux prüft Besitzer → Gruppe → others und wendet nur die erste passende Klasse an. anna ist Besitzerin, also gilt r--. Rechte werden nie zusammengezählt."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-9-projekt",
+      "title": "Teil 3 · Aufgabe 9",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Sie verschaffen sich einen Überblick über die Verzeichnisse unter `/srv/projekt`.\n```\ntim@srv01:~$ ls -ld /srv/projekt\ndrwxr-x--- 5 root projekt 4096 Nov  2 08:00 /srv/projekt\n\ntim@srv01:~$ ls -l /srv/projekt\ninsgesamt 12\ndrwxrwx--- 2 anna extern  4096 Nov  3 09:20 austausch\ndrwxrwx--- 3 ben  projekt 4096 Nov  3 09:12 code\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 doku\n\ntim@srv01:~$ ls -l /srv/projekt/code\ninsgesamt 4\ndrwxr-xr-x 2 ben projekt 4096 Nov  3 09:12 build\n```\n```\n/srv/projekt      root : projekt   [?]\n├── doku          anna : projekt   770\n├── code          [?]  : [?]       [?]\n│   └── build     ben  : [?]       [?]\n└── austausch     anna : extern    [?]\n```\nErgänzen Sie die Rechte von **/srv/projekt** (oktal).",
+      "hints": [],
+      "solutions": [
+        "750"
+      ],
+      "explanation": "`ls -ld` zeigt das Verzeichnis selbst: `drwxr-x---` = 750.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "750"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-9-code",
+      "title": "Teil 3 · Aufgabe 9",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Sie verschaffen sich einen Überblick über die Verzeichnisse unter `/srv/projekt`.\n```\ntim@srv01:~$ ls -ld /srv/projekt\ndrwxr-x--- 5 root projekt 4096 Nov  2 08:00 /srv/projekt\n\ntim@srv01:~$ ls -l /srv/projekt\ninsgesamt 12\ndrwxrwx--- 2 anna extern  4096 Nov  3 09:20 austausch\ndrwxrwx--- 3 ben  projekt 4096 Nov  3 09:12 code\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 doku\n\ntim@srv01:~$ ls -l /srv/projekt/code\ninsgesamt 4\ndrwxr-xr-x 2 ben projekt 4096 Nov  3 09:12 build\n```\n```\n/srv/projekt      root : projekt   [?]\n├── doku          anna : projekt   770\n├── code          [?]  : [?]       [?]\n│   └── build     ben  : [?]       [?]\n└── austausch     anna : extern    [?]\n```\nErgänzen Sie für **code** Besitzer, Gruppe und Rechte oktal (Antwort z. B. `max, team, 700`).",
+      "hints": [],
+      "solutions": [
+        "ben, projekt, 770"
+      ],
+      "explanation": "`drwxrwx--- 3 ben projekt` → ben : projekt, 770.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben, projekt, 770",
+          "ben:projekt 770",
+          "ben : projekt 770"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-9-build",
+      "title": "Teil 3 · Aufgabe 9",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Sie verschaffen sich einen Überblick über die Verzeichnisse unter `/srv/projekt`.\n```\ntim@srv01:~$ ls -ld /srv/projekt\ndrwxr-x--- 5 root projekt 4096 Nov  2 08:00 /srv/projekt\n\ntim@srv01:~$ ls -l /srv/projekt\ninsgesamt 12\ndrwxrwx--- 2 anna extern  4096 Nov  3 09:20 austausch\ndrwxrwx--- 3 ben  projekt 4096 Nov  3 09:12 code\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 doku\n\ntim@srv01:~$ ls -l /srv/projekt/code\ninsgesamt 4\ndrwxr-xr-x 2 ben projekt 4096 Nov  3 09:12 build\n```\n```\n/srv/projekt      root : projekt   [?]\n├── doku          anna : projekt   770\n├── code          [?]  : [?]       [?]\n│   └── build     ben  : [?]       [?]\n└── austausch     anna : extern    [?]\n```\nErgänzen Sie für **build** die Gruppe und die Rechte oktal (Antwort z. B. `team, 700`).",
+      "hints": [],
+      "solutions": [
+        "projekt, 755"
+      ],
+      "explanation": "`drwxr-xr-x` = 755, Gruppe projekt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "projekt, 755"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-9-austausch",
+      "title": "Teil 3 · Aufgabe 9",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "Sie verschaffen sich einen Überblick über die Verzeichnisse unter `/srv/projekt`.\n```\ntim@srv01:~$ ls -ld /srv/projekt\ndrwxr-x--- 5 root projekt 4096 Nov  2 08:00 /srv/projekt\n\ntim@srv01:~$ ls -l /srv/projekt\ninsgesamt 12\ndrwxrwx--- 2 anna extern  4096 Nov  3 09:20 austausch\ndrwxrwx--- 3 ben  projekt 4096 Nov  3 09:12 code\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 doku\n\ntim@srv01:~$ ls -l /srv/projekt/code\ninsgesamt 4\ndrwxr-xr-x 2 ben projekt 4096 Nov  3 09:12 build\n```\n```\n/srv/projekt      root : projekt   [?]\n├── doku          anna : projekt   770\n├── code          [?]  : [?]       [?]\n│   └── build     ben  : [?]       [?]\n└── austausch     anna : extern    [?]\n```\nErgänzen Sie für **austausch** die Rechte oktal.",
+      "hints": [],
+      "solutions": [
+        "770"
+      ],
+      "explanation": "`drwxrwx---` = 770. Die Linkzahl 5 bei /srv/projekt ergibt sich aus 2 + drei Unterverzeichnissen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "770"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-10a-cd-absolute",
+      "title": "Teil 4 · Aufgabe 10a",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Sie befinden sich im Home-Verzeichnis von `tim` (`/home/tim`). Wechseln Sie mit einer **absoluten** Pfadangabe nach `/srv/projekt/doku`.",
+      "hints": [],
+      "solutions": [
+        "cd /srv/projekt/doku"
+      ],
+      "explanation": "Absolute Pfade beginnen mit `/` und gelten von überall. tim kommt hin, weil er in projekt ist (/srv/projekt hat für die Gruppe r-x).",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "cwd",
+            "path": "/srv/projekt/doku"
+          },
+          {
+            "type": "command",
+            "pattern": "^cd /srv/projekt/doku/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-10b-prompt",
+      "title": "Teil 4 · Aufgabe 10b",
+      "category": "login",
+      "type": "question",
+      "text": "Sie sind als `tim` auf `srv01` angemeldet (Prompt `tim@srv01:~$`) und wechseln mit `cd /srv/projekt/doku`. Wie lautet der Prompt danach?",
+      "hints": [],
+      "solutions": [
+        "tim@srv01:/srv/projekt/doku$"
+      ],
+      "explanation": "Nach dem Doppelpunkt steht das aktuelle Verzeichnis.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "tim@srv01:/srv/projekt/doku$",
+          "tim@srv01:/srv/projekt/doku $"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-10c-cd-relative",
+      "title": "Teil 4 · Aufgabe 10c",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "cwd": "/srv/projekt/doku",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Wechseln Sie von `/srv/projekt/doku` mit einer **relativen** Pfadangabe nach `/srv/projekt/code`.",
+      "hints": [],
+      "solutions": [
+        "cd ../code"
+      ],
+      "explanation": "`..` ist das übergeordnete Verzeichnis (/srv/projekt), von dort weiter nach code.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "cwd",
+            "path": "/srv/projekt/code"
+          },
+          {
+            "type": "command",
+            "pattern": "^cd (\\./)?\\.\\./code/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-10d-cd-home",
+      "title": "Teil 4 · Aufgabe 10d",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "cwd": "/srv/projekt/code",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Wechseln Sie zurück in Ihr Home-Verzeichnis.",
+      "hints": [],
+      "solutions": [
+        "cd ~",
+        "cd"
+      ],
+      "explanation": "`cd ~` oder nur `cd`. `cd -` springt zum zuletzt besuchten Verzeichnis zurück.",
+      "check": {
+        "type": "cwd",
+        "path": "/home/tim"
+      }
+    },
+    {
+      "id": "u2-10e-cd-relative-home",
+      "title": "Teil 4 · Aufgabe 10e",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Sie stehen wieder in `/home/tim`. Wechseln Sie mit einer **relativen** Pfadangabe (ohne `~`, ohne `/` am Anfang) nach `/srv/projekt/doku`.",
+      "hints": [],
+      "solutions": [
+        "cd ../../srv/projekt/doku"
+      ],
+      "explanation": "`..` = /home, `../..` = /, dann weiter nach srv/projekt/doku.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "cwd",
+            "path": "/srv/projekt/doku"
+          },
+          {
+            "type": "command",
+            "pattern": "^cd (\\./)?\\.\\./\\.\\./srv/projekt/doku/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-10f-dots",
+      "title": "Teil 4 · Aufgabe 10f",
+      "category": "files",
+      "type": "question",
+      "text": "Erklären Sie die Bedeutung von `.`, `..` und `~`.",
+      "choices": [
+        ". = aktuelles Verzeichnis · .. = übergeordnetes Verzeichnis · ~ = Home-Verzeichnis des angemeldeten Benutzers",
+        ". = Wurzelverzeichnis · .. = aktuelles Verzeichnis · ~ = Home-Verzeichnis von root",
+        ". = versteckte Datei · .. = vorheriges Verzeichnis (wie cd -) · ~ = temporäres Verzeichnis",
+        ". = übergeordnetes Verzeichnis · .. = zwei Ebenen höher · ~ = Wurzelverzeichnis"
+      ],
+      "hints": [],
+      "solutions": [
+        ". = aktuelles Verzeichnis · .. = übergeordnetes Verzeichnis · ~ = Home-Verzeichnis des angemeldeten Benutzers"
+      ],
+      "explanation": "Relative Pfade beginnen im aktuellen Verzeichnis (`.`), `..` geht eine Ebene hoch, `~` steht für das eigene Home.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          ". = aktuelles Verzeichnis · .. = übergeordnetes Verzeichnis · ~ = Home-Verzeichnis des angemeldeten Benutzers"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-11a-mkdir",
+      "title": "Teil 4 · Aufgabe 11a",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "cwd": "/srv/projekt",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Sie stehen in `/srv/projekt` und möchten, ohne das Verzeichnis zu wechseln, einen Testordner anlegen. Legen Sie das Verzeichnis `testlauf` im Verzeichnis `code` an (relativer Pfad, ohne `cd`).",
+      "hints": [],
+      "solutions": [
+        "mkdir code/testlauf"
+      ],
+      "explanation": "`mkdir code/testlauf` (gleichwertig `mkdir ./code/testlauf`). Zum Anlegen braucht man w und x im Elternverzeichnis.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "exists",
+            "path": "/srv/projekt/code/testlauf",
+            "nodeType": "directory"
+          },
+          {
+            "type": "command",
+            "pattern": "^mkdir (\\./)?code/testlauf/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-11b-why",
+      "title": "Teil 4 · Aufgabe 11b",
+      "category": "access",
+      "type": "question",
+      "text": "Sie stehen in `/srv/projekt` (`tim@srv01:/srv/projekt$`) und legen mit `mkdir code/testlauf` einen Testordner an. `code` gehört `ben:projekt` mit `drwxrwx---`.\nWarum funktioniert der Befehl ohne `sudo`?",
+      "choices": [
+        "code gehört ben:projekt mit 770. tim ist Mitglied von projekt, die Gruppe hat rwx, also darf tim dort anlegen.",
+        "Weil tim in der Gruppe sudo ist, braucht er sudo nie.",
+        "Weil mkdir grundsätzlich keine Rechte braucht.",
+        "Weil /srv/projekt root gehört und root alles darf."
+      ],
+      "hints": [],
+      "solutions": [
+        "code gehört ben:projekt mit 770. tim ist Mitglied von projekt, die Gruppe hat rwx, also darf tim dort anlegen."
+      ],
+      "explanation": "Zum Anlegen braucht man w und x im Elternverzeichnis – hier über die Gruppe projekt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "code gehört ben:projekt mit 770. tim ist Mitglied von projekt, die Gruppe hat rwx, also darf tim dort anlegen."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-11c-ls",
+      "title": "Teil 4 · Aufgabe 11c",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "cwd": "/srv/projekt",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Zeigen Sie den Inhalt von `code` im ausführlichen Format an, ohne dorthin zu wechseln (Sie stehen in `/srv/projekt`).",
+      "hints": [],
+      "solutions": [
+        "ls -l code"
+      ],
+      "explanation": "`ls -l code` listet den Inhalt von code, `ls -ld code` würde den Ordner selbst zeigen.",
+      "check": {
+        "type": "command",
+        "pattern": "^ls -l (\\./)?code/?$"
+      }
+    },
+    {
+      "id": "u2-11d-line",
+      "title": "Teil 4 · Aufgabe 11d",
+      "category": "files",
+      "type": "question",
+      "text": "Ergänzen Sie die Zeile für `testlauf` in der Ausgabe von `ls -l code` (umask von tim: 0027, kein SGID-Bit):\n```\ninsgesamt 8\ndrwxr-xr-x 2 ben   projekt 4096 Nov 10 09:17 build\n__________ 2 _____ _____   4096 Nov 10 09:20 testlauf\n```\nAntwort: Rechte, Besitzer, Gruppe",
+      "hints": [],
+      "solutions": [
+        "drwxr-x---, tim, tim"
+      ],
+      "explanation": "Neue Verzeichnisse starten mit 777, die umask 0027 entzieht 027 → 750 = `drwxr-x---`. Besitzer tim, Gruppe ist tims Primärgruppe tim, weil kein SGID-Bit gesetzt ist.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "drwxr-x---, tim, tim",
+          "drwxr-x--- 2 tim tim"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-12a-file",
+      "title": "Teil 4 · Aufgabe 12a",
+      "category": "files",
+      "type": "question",
+      "text": "Sie legen in Ihrem Home-Verzeichnis zwei neue Einträge an (umask 0027).\n```\ntim@srv01:~$ touch ideen.txt\ntim@srv01:~$ mkdir skizzen\n```\n**ideen.txt**: Rechte symbolisch, Rechte oktal, Besitzer, Gruppe?",
+      "hints": [],
+      "solutions": [
+        "rw-r-----, 640, tim, tim"
+      ],
+      "explanation": "Dateien starten mit 666, minus 027 → 640 = `rw-r-----`, Besitzer und Gruppe tim.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rw-r-----, 640, tim, tim",
+          "-rw-r-----, 640, tim, tim"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-12a-dir",
+      "title": "Teil 4 · Aufgabe 12a",
+      "category": "files",
+      "type": "question",
+      "text": "Sie legen in Ihrem Home-Verzeichnis zwei neue Einträge an (umask 0027).\n```\ntim@srv01:~$ touch ideen.txt\ntim@srv01:~$ mkdir skizzen\n```\n**skizzen**: Rechte symbolisch, Rechte oktal, Besitzer, Gruppe?",
+      "hints": [],
+      "solutions": [
+        "rwxr-x---, 750, tim, tim"
+      ],
+      "explanation": "Verzeichnisse starten mit 777, minus 027 → 750 = `rwxr-x---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rwxr-x---, 750, tim, tim",
+          "drwxr-x---, 750, tim, tim"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-12b-calc",
+      "title": "Teil 4 · Aufgabe 12b",
+      "category": "files",
+      "type": "question",
+      "text": "Sie legen mit `touch ideen.txt` eine Datei an (umask von tim: 0027). Zeigen Sie die Rechnung für `ideen.txt`: Ausgangsrechte 666, umask 0027.",
+      "choices": [
+        "Besitzer 6 − 0 = 6, Gruppe 6 − 2 = 4, others 6 − 7 → 0 ⇒ 640",
+        "666 − 027 = 639",
+        "Besitzer 6 − 0 = 6, Gruppe 6 − 2 = 4, others 6 − 7 = −1 → 1 ⇒ 641",
+        "666 + 027 = 693 → gekürzt 640"
+      ],
+      "hints": [],
+      "solutions": [
+        "Besitzer 6 − 0 = 6, Gruppe 6 − 2 = 4, others 6 − 7 → 0 ⇒ 640"
+      ],
+      "explanation": "Genau genommen werden die Bits der umask gelöscht, es ist keine normale Subtraktion – deshalb wird others 0 und nicht negativ.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Besitzer 6 − 0 = 6, Gruppe 6 − 2 = 4, others 6 − 7 → 0 ⇒ 640"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-12c-anna",
+      "title": "Teil 4 · Aufgabe 12c",
+      "category": "files",
+      "type": "question",
+      "text": "`tim@srv01:~$ touch ideen.txt` und `tim@srv01:~$ mkdir skizzen` – welche Rechte (oktal) hätten die beiden Einträge, wenn `anna` (umask 0022) sie angelegt hätte? (Antwort: Datei, Verzeichnis)",
+      "hints": [],
+      "solutions": [
+        "644, 755"
+      ],
+      "explanation": "666 − 022 = 644, 777 − 022 = 755.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "644, 755",
+          "644/755"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-13a-cp",
+      "title": "Teil 4 · Aufgabe 13a",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Im Home-Verzeichnis von `tim` liegen die Dateien `bericht.txt` und `notiz.txt`. Kopieren Sie `bericht.txt` in das Verzeichnis `/srv/projekt/doku`. Das Original soll erhalten bleiben.",
+      "hints": [],
+      "solutions": [
+        "cp bericht.txt /srv/projekt/doku/"
+      ],
+      "explanation": "`cp` erzeugt eine neue Datei: Besitzer ist der ausführende Benutzer, die Rechte ergeben sich aus Quelle und umask, der Zeitstempel ist neu.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "exists",
+            "path": "/srv/projekt/doku/bericht.txt",
+            "nodeType": "file"
+          },
+          {
+            "type": "exists",
+            "path": "/home/tim/bericht.txt",
+            "nodeType": "file"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-13b-mv",
+      "title": "Teil 4 · Aufgabe 13b",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Verschieben Sie `notiz.txt` (im Home-Verzeichnis) in das Verzeichnis `/srv/projekt/code`.",
+      "hints": [],
+      "solutions": [
+        "mv notiz.txt /srv/projekt/code/"
+      ],
+      "explanation": "`mv` ändert innerhalb eines Dateisystems nur den Verzeichniseintrag – Besitzer, Rechte und Zeitstempel bleiben erhalten.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "exists",
+            "path": "/srv/projekt/code/notiz.txt",
+            "nodeType": "file"
+          },
+          {
+            "type": "notExists",
+            "path": "/home/tim/notiz.txt"
+          },
+          {
+            "type": "command",
+            "pattern": "^mv "
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-13c-cp-rm",
+      "title": "Teil 4 · Aufgabe 13c",
+      "category": "files",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Erreichen Sie dasselbe Ergebnis wie in 13b (notiz.txt landet in `/srv/projekt/code` und ist aus dem Home verschwunden) – diesmal mit den beiden Befehlen **cp** und **rm**.",
+      "hints": [],
+      "solutions": [
+        "cp notiz.txt /srv/projekt/code/",
+        "rm notiz.txt"
+      ],
+      "solutionIsSequence": true,
+      "explanation": "`cp` + `rm` hat dasselbe Ergebnis wie `mv`. `rm` löscht endgültig, es gibt keinen Papierkorb.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "exists",
+            "path": "/srv/projekt/code/notiz.txt",
+            "nodeType": "file"
+          },
+          {
+            "type": "notExists",
+            "path": "/home/tim/notiz.txt"
+          },
+          {
+            "type": "command",
+            "pattern": "^rm (\\./|~/|/home/tim/)?notiz\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-13d-result",
+      "title": "Teil 4 · Aufgabe 13d",
+      "category": "files",
+      "type": "question",
+      "text": "Im Home-Verzeichnis von `tim` liegen `bericht.txt` und `notiz.txt`. Sie führen aus:\na) `cp bericht.txt /srv/projekt/doku/`\nb) `mv notiz.txt /srv/projekt/code/`\nWas liegt nach a) und was nach b) noch in Ihrem Home-Verzeichnis?",
+      "choices": [
+        "Nach a) liegt bericht.txt noch im Home (Kopie). Nach b) ist notiz.txt nicht mehr im Home.",
+        "Nach a) ist bericht.txt weg. Nach b) liegt notiz.txt noch im Home.",
+        "Nach a) und b) liegen beide Dateien noch im Home.",
+        "Nach a) und b) sind beide Dateien aus dem Home verschwunden."
+      ],
+      "hints": [],
+      "solutions": [
+        "Nach a) liegt bericht.txt noch im Home (Kopie). Nach b) ist notiz.txt nicht mehr im Home."
+      ],
+      "explanation": "cp kopiert (Original bleibt), mv verschiebt (Original verschwindet).",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Nach a) liegt bericht.txt noch im Home (Kopie). Nach b) ist notiz.txt nicht mehr im Home."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-14a-chmod",
+      "title": "Teil 5 · Aufgabe 14a",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "mkdir /home/tim/skizzen",
+        "chown tim:tim /home/tim/skizzen",
+        "chmod 750 /home/tim/skizzen",
+        "touch /home/tim/ideen.txt",
+        "chown tim:tim /home/tim/ideen.txt",
+        "chmod 640 /home/tim/ideen.txt"
+      ],
+      "text": "Im Home-Verzeichnis liegen der Ordner `skizzen` und die Datei `ideen.txt`. Beide gehören `tim`.\n`skizzen` soll nur für `tim` zugänglich sein (Lesen, Schreiben, Betreten), für alle anderen gar nicht. Verwenden Sie `chmod` mit **oktalen** Rechten.",
+      "hints": [],
+      "solutions": [
+        "chmod 700 skizzen"
+      ],
+      "explanation": "Die oktale Schreibweise setzt alle neun Rechtebits auf einmal. tim ist Besitzer, deshalb kein sudo.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/skizzen",
+            "mode": "700"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod 0?700 (\\./)?skizzen/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-14b-chmod",
+      "title": "Teil 5 · Aufgabe 14b",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "mkdir /home/tim/skizzen",
+        "chown tim:tim /home/tim/skizzen",
+        "chmod 700 /home/tim/skizzen",
+        "touch /home/tim/ideen.txt",
+        "chown tim:tim /home/tim/ideen.txt",
+        "chmod 640 /home/tim/ideen.txt"
+      ],
+      "text": "`ideen.txt` soll für Besitzer und Gruppe les- und schreibbar sein, für others gesperrt. Verwenden Sie `chmod` mit **oktalen** Rechten.",
+      "hints": [],
+      "solutions": [
+        "chmod 660 ideen.txt"
+      ],
+      "explanation": "rw- rw- --- = 660.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/ideen.txt",
+            "mode": "660"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod 0?660 (\\./)?ideen\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-14c-symbolic",
+      "title": "Teil 5 · Aufgabe 14c",
+      "category": "readPermissions",
+      "type": "question",
+      "text": "`skizzen` (Ordner) und `ideen.txt` gehören tim. Sie führen `chmod 700 skizzen` (a) und `chmod 660 ideen.txt` (b) aus. Geben Sie die Rechte aus a) und b) in symbolischer Schreibweise an. (Antwort: a, b)",
+      "hints": [],
+      "solutions": [
+        "rwx------, rw-rw----"
+      ],
+      "explanation": "700 = `rwx------`, 660 = `rw-rw----`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "rwx------, rw-rw----",
+          "drwx------, -rw-rw----"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-15a-gw",
+      "title": "Teil 5 · Aufgabe 15a",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Im Home-Verzeichnis liegen `bericht.txt` (`-rw-r-----`), `weitergabe.txt` (`-rw-r--r--`) und der Ordner `material` (`drwxr-xr-x`). Verwenden Sie die **symbolische** Schreibweise.\nDie Gruppe soll `bericht.txt` zusätzlich beschreiben dürfen.",
+      "hints": [],
+      "solutions": [
+        "chmod g+w bericht.txt"
+      ],
+      "explanation": "Klasse `g`, Operator `+`, Recht `w`.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/bericht.txt",
+            "mode": "660"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod g\\+w (\\./)?bericht\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-15b-orwx",
+      "title": "Teil 5 · Aufgabe 15b",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Bei `weitergabe.txt` (`-rw-r--r--`) sollen für others **alle** Rechte entfernt werden (symbolisch).",
+      "hints": [],
+      "solutions": [
+        "chmod o-rwx weitergabe.txt"
+      ],
+      "explanation": "`o-rwx` entfernt alle drei Rechte für others, egal welche gesetzt waren.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/weitergabe.txt",
+            "mode": "640"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod (o-rwx|o=) (\\./)?weitergabe\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-15c-equals",
+      "title": "Teil 5 · Aufgabe 15c",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Für `material` (`drwxr-xr-x`) sollen mit einem **einzigen** Befehl die Rechte genau auf `rwx` für den Besitzer und keine Rechte für Gruppe und others gesetzt werden (symbolisch).",
+      "hints": [],
+      "solutions": [
+        "chmod u=rwx,g=,o= material"
+      ],
+      "explanation": "Bei `=` entfallen alle nicht genannten Rechte der Klasse. Mehrere Angaben trennt man mit Komma (gleichwertig `chmod 700 material`).",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/material",
+            "mode": "700"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod (u=rwx,g=,o=|u=rwx,go=|u=rwx,o=,g=|g=,o=,u=rwx|go=,u=rwx) (\\./)?material/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-16-1",
+      "title": "Teil 5 · Aufgabe 16 (1)",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Entscheiden Sie, was geändert werden muss (Besitzer, Gruppe oder Rechte), und führen Sie den passenden Befehl aus – `sudo` nur, wenn nötig.\n```\ntim@srv01:~$ ls -l entwurf.txt\n-rw-r----- 1 tim projekt 640 Nov 10 08:30 entwurf.txt\n```\nZiel: Alle Mitglieder von `projekt` sollen die Datei ändern dürfen.",
+      "hints": [],
+      "solutions": [
+        "chmod g+w entwurf.txt"
+      ],
+      "explanation": "Die Gruppe projekt ist richtig, sie hat nur `r--` → Rechte ändern. tim ist Besitzer, also kein sudo.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/home/tim/entwurf.txt",
+            "mode": "660"
+          },
+          {
+            "type": "owner",
+            "path": "/home/tim/entwurf.txt",
+            "group": "projekt"
+          },
+          {
+            "type": "command",
+            "pattern": "^chmod "
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-16-2",
+      "title": "Teil 5 · Aufgabe 16 (2)",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "echo Angebot > /srv/projekt/doku/angebot.txt",
+        "chown anna:anna /srv/projekt/doku/angebot.txt",
+        "chmod 660 /srv/projekt/doku/angebot.txt"
+      ],
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku/angebot.txt\n-rw-rw---- 1 anna anna 1500 Nov 10 08:35 /srv/projekt/doku/angebot.txt\n```\nZiel: Alle Mitglieder von `projekt` sollen die Datei ändern dürfen. Ändern Sie nur, was nötig ist.",
+      "hints": [],
+      "solutions": [
+        "sudo chgrp projekt /srv/projekt/doku/angebot.txt"
+      ],
+      "explanation": "Die Rechte `rw-rw----` stimmen schon, nur die Gruppe ist falsch. tim ist nicht Besitzer → sudo nötig. Gleichwertig: `sudo chown :projekt …`.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "owner",
+            "path": "/srv/projekt/doku/angebot.txt",
+            "owner": "anna",
+            "group": "projekt"
+          },
+          {
+            "type": "mode",
+            "path": "/srv/projekt/doku/angebot.txt",
+            "mode": "660"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-16-3",
+      "title": "Teil 5 · Aufgabe 16 (3)",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "echo export > /srv/projekt/code/export.csv",
+        "chown tim:projekt /srv/projekt/code/export.csv",
+        "chmod 660 /srv/projekt/code/export.csv"
+      ],
+      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/code/export.csv\n-rw-rw---- 1 tim projekt 3200 Nov 10 08:40 /srv/projekt/code/export.csv\n```\nZiel: Die Datei soll `anna` gehören.",
+      "hints": [],
+      "solutions": [
+        "sudo chown anna /srv/projekt/code/export.csv"
+      ],
+      "explanation": "Besitzer ändern darf nur root → sudo nötig.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "owner",
+            "path": "/srv/projekt/code/export.csv",
+            "owner": "anna",
+            "group": "projekt"
+          },
+          {
+            "type": "mode",
+            "path": "/srv/projekt/code/export.csv",
+            "mode": "660"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-16-sudo",
+      "title": "Teil 5 · Aufgabe 16",
+      "category": "changePermissions",
+      "type": "question",
+      "text": "```\n(1) tim@srv01:~$ ls -l entwurf.txt\n    -rw-r----- 1 tim projekt 640 Nov 10 08:30 entwurf.txt\n    Ziel: Alle Mitglieder von projekt sollen die Datei ändern dürfen.\n\n(2) tim@srv01:~$ ls -l /srv/projekt/doku/angebot.txt\n    -rw-rw---- 1 anna anna 1500 Nov 10 08:35 /srv/projekt/doku/angebot.txt\n    Ziel: Alle Mitglieder von projekt sollen die Datei ändern dürfen.\n\n(3) tim@srv01:~$ ls -l /srv/projekt/code/export.csv\n    -rw-rw---- 1 tim projekt 3200 Nov 10 08:40 /srv/projekt/code/export.csv\n    Ziel: Die Datei soll anna gehören.\n```\nIn welchen der drei Situationen ist `sudo` nötig?",
+      "choices": [
+        "nur (3)",
+        "(2) und (3)",
+        "(1), (2) und (3)",
+        "nur (2)"
+      ],
+      "hints": [],
+      "solutions": [
+        "(2) und (3)"
+      ],
+      "explanation": "chmod: Besitzer (oder root). chgrp: Besitzer, aber nur auf eigene Gruppen (oder root). chown auf einen anderen Besitzer: nur root. Bei (2) ist tim nicht Besitzer, bei (3) ändert sich der Besitzer.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "(2) und (3)"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "echo Angebot > /srv/projekt/doku/angebot.txt",
+        "chown anna:anna /srv/projekt/doku/angebot.txt",
+        "chmod 660 /srv/projekt/doku/angebot.txt",
+        "echo export > /srv/projekt/code/export.csv",
+        "chown tim:projekt /srv/projekt/code/export.csv",
+        "chmod 660 /srv/projekt/code/export.csv"
+      ]
+    },
+    {
+      "id": "u2-17a-analyse",
+      "title": "Teil 5 · Aufgabe 17a",
+      "category": "access",
+      "type": "question",
+      "text": "Sie haben `bericht.txt` als `protokoll.txt` nach `/srv/projekt/doku` kopiert. Ben meldet ein Problem.\n```\nben@srv01:~$ cat /srv/projekt/doku/protokoll.txt\ncat: /srv/projekt/doku/protokoll.txt: Keine Berechtigung\n\ntim@srv01:~$ ls -l /srv/projekt/doku/protokoll.txt\n-rw-r----- 1 tim tim 733 Nov 10 09:05 /srv/projekt/doku/protokoll.txt\n```\nWarum darf `ben` die Datei nicht lesen?",
+      "choices": [
+        "ben ist weder Besitzer noch Mitglied der Gruppe tim – für ihn gilt others mit ---. Der Weg zur Datei ist frei (ben ist in projekt).",
+        "ben fehlt das x-Recht auf /srv/projekt.",
+        "Die Datei ist für alle gesperrt, weil sie mit cp kopiert wurde.",
+        "ben müsste sich erst neu anmelden, weil er in extern aufgenommen wurde."
+      ],
+      "hints": [],
+      "solutions": [
+        "ben ist weder Besitzer noch Mitglied der Gruppe tim – für ihn gilt others mit ---. Der Weg zur Datei ist frei (ben ist in projekt)."
+      ],
+      "explanation": "Die Kopie hat tims Primärgruppe tim bekommen. Für ben gilt deshalb others `---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben ist weder Besitzer noch Mitglied der Gruppe tim – für ihn gilt others mit ---. Der Weg zur Datei ist frei (ben ist in projekt)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "cp /home/tim/bericht.txt /srv/projekt/doku/protokoll.txt",
+        "chown tim:tim /srv/projekt/doku/protokoll.txt",
+        "chmod 640 /srv/projekt/doku/protokoll.txt"
+      ]
+    },
+    {
+      "id": "u2-17b-chgrp",
+      "title": "Teil 5 · Aufgabe 17b",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "cp /home/tim/bericht.txt /srv/projekt/doku/protokoll.txt",
+        "chown tim:tim /srv/projekt/doku/protokoll.txt",
+        "chmod 640 /srv/projekt/doku/protokoll.txt"
+      ],
+      "text": "Lösen Sie das Problem aus 17a, ohne unnötige Rechte zu vergeben (Prompt `tim@srv01:~$`, **absoluter Pfad**). Verwenden Sie `chgrp`.",
+      "hints": [],
+      "solutions": [
+        "chgrp projekt /srv/projekt/doku/protokoll.txt"
+      ],
+      "explanation": "Nach chgrp steht `-rw-r----- tim projekt`. Die Gruppe darf lesen, das genügt ben. Kein sudo nötig: tim ist Besitzer und selbst Mitglied von projekt.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "owner",
+            "path": "/srv/projekt/doku/protokoll.txt",
+            "owner": "tim",
+            "group": "projekt"
+          },
+          {
+            "type": "mode",
+            "path": "/srv/projekt/doku/protokoll.txt",
+            "mode": "640"
+          },
+          {
+            "type": "command",
+            "pattern": "^chgrp projekt /srv/projekt/doku/protokoll\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-17c-chown",
+      "title": "Teil 5 · Aufgabe 17c",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "cp /home/tim/bericht.txt /srv/projekt/doku/protokoll.txt",
+        "chown tim:tim /srv/projekt/doku/protokoll.txt",
+        "chmod 640 /srv/projekt/doku/protokoll.txt"
+      ],
+      "text": "Lösen Sie dasselbe Problem mit einem gleichwertigen Befehl eines **anderen Programms** (absoluter Pfad).",
+      "hints": [],
+      "solutions": [
+        "chown :projekt /srv/projekt/doku/protokoll.txt",
+        "chown tim:projekt /srv/projekt/doku/protokoll.txt"
+      ],
+      "explanation": "`chown :projekt datei` ändert nur die Gruppe – gleichwertig zu `chgrp projekt datei`.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "owner",
+            "path": "/srv/projekt/doku/protokoll.txt",
+            "owner": "tim",
+            "group": "projekt"
+          },
+          {
+            "type": "mode",
+            "path": "/srv/projekt/doku/protokoll.txt",
+            "mode": "640"
+          },
+          {
+            "type": "command",
+            "pattern": "^chown (tim)?:projekt /srv/projekt/doku/protokoll\\.txt$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-17d-bad",
+      "title": "Teil 5 · Aufgabe 17d",
+      "category": "access",
+      "type": "question",
+      "text": "Sie haben `bericht.txt` als `protokoll.txt` nach `/srv/projekt/doku` kopiert. Ben meldet ein Problem.\n```\nben@srv01:~$ cat /srv/projekt/doku/protokoll.txt\ncat: /srv/projekt/doku/protokoll.txt: Keine Berechtigung\n\ntim@srv01:~$ ls -l /srv/projekt/doku/protokoll.txt\n-rw-r----- 1 tim tim 733 Nov 10 09:05 /srv/projekt/doku/protokoll.txt\n```\nWarum sind `chmod o+r …` und das Hinzufügen von `ben` zur Gruppe `tim` keine guten Lösungen?",
+      "choices": [
+        "o+r öffnet die Datei für alle Benutzer des Servers. ben in die Gruppe tim aufzunehmen gäbe ihm Zugriff auf alles, was der Gruppe tim gehört, und braucht sudo.",
+        "Beide Lösungen funktionieren technisch nicht.",
+        "o+r ist gut, nur die Gruppe tim wäre schlecht, weil ben sich neu anmelden müsste.",
+        "Beide sind gut, aber langsamer als chgrp."
+      ],
+      "hints": [],
+      "solutions": [
+        "o+r öffnet die Datei für alle Benutzer des Servers. ben in die Gruppe tim aufzunehmen gäbe ihm Zugriff auf alles, was der Gruppe tim gehört, und braucht sudo."
+      ],
+      "explanation": "Rechte für others nur öffnen, wenn es ausdrücklich verlangt wird. Die sparsame Lösung ändert genau eine Stelle: die Gruppe.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "o+r öffnet die Datei für alle Benutzer des Servers. ben in die Gruppe tim aufzunehmen gäbe ihm Zugriff auf alles, was der Gruppe tim gehört, und braucht sudo."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "cp /home/tim/bericht.txt /srv/projekt/doku/protokoll.txt",
+        "chown tim:tim /srv/projekt/doku/protokoll.txt",
+        "chmod 640 /srv/projekt/doku/protokoll.txt"
+      ]
+    },
+    {
+      "id": "u2-18a-order",
+      "title": "Teil 5 · Aufgabe 18a",
+      "category": "changePermissions",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "cwd": "/srv/projekt/doku",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "echo Plan > /srv/projekt/doku/plan.txt",
+        "chown tim:tim /srv/projekt/doku/plan.txt",
+        "chmod 640 /srv/projekt/doku/plan.txt"
+      ],
+      "text": "Die Datei `/srv/projekt/doku/plan.txt` gehört `tim` (Gruppe `tim`, Rechte `rw-r-----`). Sie soll künftig den Besitzer `anna` und die Gruppe `projekt` haben und die Rechte `rw-rw----` erhalten. Sie stehen in `/srv/projekt/doku`.\nFühren Sie die Befehle (relative Pfade) in einer Reihenfolge aus, bei der `sudo` **nur einmal** benötigt wird.",
+      "hints": [],
+      "solutions": [
+        "chmod 660 plan.txt",
+        "sudo chown anna:projekt plan.txt"
+      ],
+      "solutionIsSequence": true,
+      "explanation": "Merkregel: Erst chmod und chgrp, solange man Besitzer ist, zuletzt chown auf einen anderen Besitzer.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "owner",
+            "path": "/srv/projekt/doku/plan.txt",
+            "owner": "anna",
+            "group": "projekt"
+          },
+          {
+            "type": "mode",
+            "path": "/srv/projekt/doku/plan.txt",
+            "mode": "660"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-18b-why",
+      "title": "Teil 5 · Aufgabe 18b",
+      "category": "changePermissions",
+      "type": "question",
+      "text": "Die Datei `/srv/projekt/doku/plan.txt` gehört `tim` (Gruppe `tim`, Rechte `rw-r-----`). Sie soll künftig den Besitzer `anna` und die Gruppe `projekt` haben und die Rechte `rw-rw----` erhalten. Sie stehen in `/srv/projekt/doku`.\nReihenfolge: erst `chmod 660 plan.txt`, dann `sudo chown anna:projekt plan.txt`.\nBegründen Sie die Reihenfolge. Was passiert, wenn Sie zuerst den Besitzer ändern und `chmod` danach ohne `sudo` ausführen?",
+      "choices": [
+        "chmod darf nur der Besitzer – solange tim Besitzer ist, ohne sudo. Nach chown gehört die Datei anna, chmod ohne sudo scheitert mit „Operation not permitted“.",
+        "Die Reihenfolge ist egal – chmod funktioniert immer, weil tim in projekt ist.",
+        "chown setzt die Rechte automatisch auf 660, deshalb ist chmod danach überflüssig.",
+        "chmod nach chown ändert die Rechte von anna statt von tim."
+      ],
+      "hints": [],
+      "solutions": [
+        "chmod darf nur der Besitzer – solange tim Besitzer ist, ohne sudo. Nach chown gehört die Datei anna, chmod ohne sudo scheitert mit „Operation not permitted“."
+      ],
+      "explanation": "Mit sudo ginge es auch danach, bräuchte aber zwei sudo-Aufrufe.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "chmod darf nur der Besitzer – solange tim Besitzer ist, ohne sudo. Nach chown gehört die Datei anna, chmod ohne sudo scheitert mit „Operation not permitted“."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "echo Plan > /srv/projekt/doku/plan.txt",
+        "chown tim:tim /srv/projekt/doku/plan.txt",
+        "chmod 640 /srv/projekt/doku/plan.txt"
+      ],
+      "cwd": "/srv/projekt/doku"
+    },
+    {
+      "id": "u2-19a-group",
+      "title": "Teil 6 · Aufgabe 19a",
+      "category": "sgid",
+      "type": "question",
+      "text": "**Ausgangslage Teil 6:**\n```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nWelcher Gruppe würde eine Datei gehören, die `ben` **jetzt** in `doku` anlegt?",
+      "hints": [],
+      "solutions": [
+        "ben"
+      ],
+      "explanation": "Ohne SGID bekommt eine neue Datei die Primärgruppe des Erstellers: ben.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-19b-sgid",
+      "title": "Teil 6 · Aufgabe 19b",
+      "category": "sgid",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nWelche Einstellung bewirkt das gewünschte Verhalten? Erklären Sie ihre Wirkung.",
+      "choices": [
+        "Das SGID-Bit am Verzeichnis doku: neue Dateien und Unterverzeichnisse erben die Gruppe des Verzeichnisses statt der Primärgruppe des Erstellers.",
+        "Das Sticky-Bit am Verzeichnis doku: nur der Besitzer darf Dateien löschen.",
+        "Das SUID-Bit am Verzeichnis doku: alle Dateien gehören dann anna.",
+        "Die umask aller Benutzer auf 0002 setzen."
+      ],
+      "hints": [],
+      "solutions": [
+        "Das SGID-Bit am Verzeichnis doku: neue Dateien und Unterverzeichnisse erben die Gruppe des Verzeichnisses statt der Primärgruppe des Erstellers."
+      ],
+      "explanation": "Spezialrechte: SUID (4), SGID (2), Sticky-Bit (1). SGID auf einem Verzeichnis vererbt die Gruppe; Unterverzeichnisse erben auch das SGID-Bit.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Das SGID-Bit am Verzeichnis doku: neue Dateien und Unterverzeichnisse erben die Gruppe des Verzeichnisses statt der Primärgruppe des Erstellers."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-19c-gs",
+      "title": "Teil 6 · Aufgabe 19c",
+      "category": "sgid",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ],
+      "text": "Nehmen Sie als `tim` die Einstellung aus 19b vor (absoluter Pfad).",
+      "hints": [],
+      "solutions": [
+        "sudo chmod g+s /srv/projekt/doku"
+      ],
+      "explanation": "tim ist nicht Besitzer von doku und braucht deshalb sudo; ohne sudo kommt „Operation not permitted“.",
+      "check": {
+        "type": "all",
+        "checks": [
+          {
+            "type": "mode",
+            "path": "/srv/projekt/doku",
+            "mode": "2770"
+          },
+          {
+            "type": "command",
+            "pattern": "^sudo chmod (g\\+s|2770) /srv/projekt/doku/?$"
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2-19d-who",
+      "title": "Teil 6 · Aufgabe 19d",
+      "category": "sgid",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nMit `sudo chmod g+s /srv/projekt/doku` nimmt tim die Einstellung vor. Wer dürfte den Befehl **ohne** `sudo` ausführen und warum?",
+      "choices": [
+        "anna – sie ist Besitzerin von doku, und chmod darf nur der Besitzer (oder root).",
+        "ben – er ist Mitglied von projekt und hat rwx auf doku.",
+        "alle Mitglieder von projekt – die Gruppe hat rwx.",
+        "niemand außer root."
+      ],
+      "hints": [],
+      "solutions": [
+        "anna – sie ist Besitzerin von doku, und chmod darf nur der Besitzer (oder root)."
+      ],
+      "explanation": "Schreibrecht auf ein Verzeichnis erlaubt nicht, dessen Rechte zu ändern – das darf nur der Besitzer.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "anna – sie ist Besitzerin von doku, und chmod darf nur der Besitzer (oder root)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-20a-before",
+      "title": "Teil 6 · Aufgabe 20a",
+      "category": "sgid",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nErgänzen Sie die Rechte von `doku` **vor** `chmod g+s`: symbolisch und oktal (Antwort z. B. `drwx------, 700`)",
+      "hints": [],
+      "solutions": [
+        "drwxrwx---, 770"
+      ],
+      "explanation": "`drwxrwx---` = 770.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "drwxrwx---, 770",
+          "rwxrwx---, 770"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben"
+      ]
+    },
+    {
+      "id": "u2-20a-after",
+      "title": "Teil 6 · Aufgabe 20a",
+      "category": "sgid",
+      "type": "question",
+      "text": "```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nErgänzen Sie die Rechte von `doku` **nach** `sudo chmod g+s /srv/projekt/doku`: symbolisch und oktal",
+      "hints": [],
+      "solutions": [
+        "drwxrws---, 2770"
+      ],
+      "explanation": "Die führende Ziffer 2 steht für SGID: `drwxrws---` = 2770.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "drwxrws---, 2770",
+          "rwxrws---, 2770"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-20b-s",
+      "title": "Teil 6 · Aufgabe 20b",
+      "category": "sgid",
+      "type": "question",
+      "text": "Nach `sudo chmod g+s /srv/projekt/doku` zeigt `ls -ld` für doku `drwxrws---` (vorher `drwxrwx---`). Warum steht in der Anzeige ein kleines `s` und kein `x`?",
+      "choices": [
+        "SGID wird an der Stelle des Gruppen-x angezeigt. Weil dort vorher x gesetzt war, erscheint ein kleines s (ohne x wäre es ein großes S).",
+        "Das s ersetzt das x, die Gruppe hat danach kein Ausführungsrecht mehr.",
+        "Kleines s bedeutet Sticky-Bit, großes S wäre SGID.",
+        "Das s steht für „shared“ und erscheint immer, wenn mehrere Benutzer in der Gruppe sind."
+      ],
+      "hints": [],
+      "solutions": [
+        "SGID wird an der Stelle des Gruppen-x angezeigt. Weil dort vorher x gesetzt war, erscheint ein kleines s (ohne x wäre es ein großes S)."
+      ],
+      "explanation": "Großes S = SGID ohne Ausführungsrecht der Gruppe.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "SGID wird an der Stelle des Gruppen-x angezeigt. Weil dort vorher x gesetzt war, erscheint ein kleines s (ohne x wäre es ein großes S)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-21a-neu",
+      "title": "Teil 6 · Aufgabe 21a",
+      "category": "sgid",
+      "type": "question",
+      "text": "`/srv/projekt/doku` hat jetzt `drwxrws--- anna projekt` (SGID gesetzt). Danach legt `ben` (umask 0022) in `doku` die Datei `neu.txt` und den Ordner `unterordner` an. `konzept.txt` (`-rw-r--r-- anna anna`) existierte schon vorher.\n**neu.txt**: Besitzer, Gruppe, Rechte symbolisch?",
+      "hints": [],
+      "solutions": [
+        "ben, projekt, rw-r--r--"
+      ],
+      "explanation": "666 − 022 = 644 = `rw-r--r--`. Besitzer ist immer der Ersteller, die Gruppe kommt durch SGID vom Verzeichnis.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben, projekt, rw-r--r--",
+          "ben, projekt, -rw-r--r--"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-21a-unterordner",
+      "title": "Teil 6 · Aufgabe 21a",
+      "category": "sgid",
+      "type": "question",
+      "text": "`/srv/projekt/doku` hat jetzt `drwxrws--- anna projekt` (SGID gesetzt). Danach legt `ben` (umask 0022) in `doku` die Datei `neu.txt` und den Ordner `unterordner` an. `konzept.txt` (`-rw-r--r-- anna anna`) existierte schon vorher.\n**unterordner**: Besitzer, Gruppe, Rechte symbolisch?",
+      "hints": [],
+      "solutions": [
+        "ben, projekt, rwxr-sr-x"
+      ],
+      "explanation": "777 − 022 = 755, dazu kommt das geerbte SGID-Bit → `rwxr-sr-x`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben, projekt, rwxr-sr-x",
+          "ben, projekt, drwxr-sr-x"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-21a-konzept",
+      "title": "Teil 6 · Aufgabe 21a",
+      "category": "sgid",
+      "type": "question",
+      "text": "`/srv/projekt/doku` hat jetzt `drwxrws--- anna projekt` (SGID gesetzt). Danach legt `ben` (umask 0022) in `doku` die Datei `neu.txt` und den Ordner `unterordner` an. `konzept.txt` (`-rw-r--r-- anna anna`) existierte schon vorher.\n**konzept.txt**: Besitzer, Gruppe, Rechte symbolisch?",
+      "hints": [],
+      "solutions": [
+        "anna, anna, rw-r--r--"
+      ],
+      "explanation": "Vorhandene Dateien bleiben unverändert.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "anna, anna, rw-r--r--",
+          "anna, anna, -rw-r--r--"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-21b-retro",
+      "title": "Teil 6 · Aufgabe 21b",
+      "category": "sgid",
+      "type": "question",
+      "text": "`/srv/projekt/doku` hat jetzt `drwxrws--- anna projekt` (SGID gesetzt). Danach legt `ben` (umask 0022) in `doku` die Datei `neu.txt` und den Ordner `unterordner` an. `konzept.txt` (`-rw-r--r-- anna anna`) existierte schon vorher.\nWarum ist die Gruppe von `konzept.txt` unverändert geblieben?",
+      "choices": [
+        "SGID wirkt nur auf Einträge, die nach dem Setzen angelegt werden – vorhandene Dateien bleiben unverändert (nicht rückwirkend).",
+        "SGID wirkt nur auf Verzeichnisse, nie auf Dateien.",
+        "konzept.txt gehört anna, und SGID wirkt nicht auf Dateien der Verzeichnis-Besitzerin.",
+        "Die Änderung wird erst nach dem nächsten Neustart übernommen."
+      ],
+      "hints": [],
+      "solutions": [
+        "SGID wirkt nur auf Einträge, die nach dem Setzen angelegt werden – vorhandene Dateien bleiben unverändert (nicht rückwirkend)."
+      ],
+      "explanation": "Vorhandene Einträge muss man nachträglich mit chgrp anpassen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "SGID wirkt nur auf Einträge, die nach dem Setzen angelegt werden – vorhandene Dateien bleiben unverändert (nicht rückwirkend)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ]
+    },
+    {
+      "id": "u2-21c-chgrp",
+      "title": "Teil 6 · Aufgabe 21c",
+      "category": "sgid",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku"
+      ],
+      "text": "Geben Sie `konzept.txt` (`/srv/projekt/doku/konzept.txt`, gehört anna:anna) nachträglich die Gruppe `projekt`. Sie arbeiten als `tim`.",
+      "hints": [],
+      "solutions": [
+        "sudo chgrp projekt /srv/projekt/doku/konzept.txt"
+      ],
+      "explanation": "sudo ist nötig, weil tim nicht Besitzer ist.",
+      "check": {
+        "type": "owner",
+        "path": "/srv/projekt/doku/konzept.txt",
+        "owner": "anna",
+        "group": "projekt"
+      }
+    },
+    {
+      "id": "u2-22a",
+      "title": "Teil 7 · Aufgabe 22a",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nKönnen **anna, ben, carla, tim** den Inhalt von `/srv/projekt/doku` **auflisten**? (Antwort z. B. `ja, nein, ja, nein`)",
+      "hints": [],
+      "solutions": [
+        "ja, ja, nein, ja"
+      ],
+      "explanation": "anna (Besitzerin), ben und tim (Gruppe projekt) haben x auf /srv/projekt und r auf doku. carla hat auf /srv/projekt others `---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ja, ja, nein, ja"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22b",
+      "title": "Teil 7 · Aufgabe 22b",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nKönnen **anna, ben, carla, tim** in das Verzeichnis `/srv/projekt/code/build` **wechseln**?",
+      "hints": [],
+      "solutions": [
+        "ja, ja, nein, ja"
+      ],
+      "explanation": "Wechseln braucht x auf dem ganzen Weg: /srv/projekt (Gruppe r-x), code (Gruppe rwx), build (Gruppe r-x). carla scheitert schon an /srv/projekt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ja, ja, nein, ja"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22c",
+      "title": "Teil 7 · Aufgabe 22c",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nKönnen **anna, ben, carla, tim** in `/srv/projekt/code/build` eine neue Datei **anlegen**?",
+      "hints": [],
+      "solutions": [
+        "nein, ja, nein, nein"
+      ],
+      "explanation": "build gehört ben:projekt mit 755. Nur ben (Besitzer, rwx) darf anlegen. Für anna und tim gilt die Gruppe mit `r-x` – es fehlt w.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "nein, ja, nein, nein"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22d",
+      "title": "Teil 7 · Aufgabe 22d",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nKönnen **anna, ben, carla, tim** den Inhalt von `/srv/projekt/austausch` **auflisten**?",
+      "hints": [],
+      "solutions": [
+        "ja, ja, nein, nein"
+      ],
+      "explanation": "austausch gehört anna:extern mit 770. anna ist Besitzerin, ben ist in extern. tim ist weder Besitzer noch in extern → others `---`. carla wäre in extern, kommt aber nicht durch /srv/projekt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ja, ja, nein, nein"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22e",
+      "title": "Teil 7 · Aufgabe 22e",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nKönnen **anna, ben, carla, tim** `/srv/projekt/doku/konzept.txt` nach `/srv/projekt/austausch` **kopieren**?",
+      "hints": [],
+      "solutions": [
+        "ja, ja, nein, nein"
+      ],
+      "explanation": "Kopieren braucht r auf der Quelle, x auf dem ganzen Weg sowie w und x im Ziel. tim kann konzept.txt lesen, scheitert aber am Ziel austausch.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ja, ja, nein, nein"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22-carla-a",
+      "title": "Teil 7 · Aufgabe 22 Begründung",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nBegründen Sie: Warum kann **carla** den Inhalt von `/srv/projekt/doku` nicht auflisten (Zeile a)?",
+      "choices": [
+        "/srv/projekt hat für others ---. Ohne x darauf kommt carla nicht zu doku.",
+        "carla ist nicht in projekt und doku hat für others ---, mehr spielt keine Rolle.",
+        "carla ist in extern, und extern hat auf doku keine Rechte.",
+        "Das SGID-Bit an doku sperrt alle aus, die nicht in projekt sind."
+      ],
+      "hints": [],
+      "solutions": [
+        "/srv/projekt hat für others ---. Ohne x darauf kommt carla nicht zu doku."
+      ],
+      "explanation": "Immer den ganzen Pfad prüfen: Schon das erste versperrte Verzeichnis genügt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "/srv/projekt hat für others ---. Ohne x darauf kommt carla nicht zu doku."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22-tim-d",
+      "title": "Teil 7 · Aufgabe 22 Begründung",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nBegründen Sie: Warum kann **tim** `/srv/projekt/austausch` nicht auflisten (Zeile d)?",
+      "choices": [
+        "austausch gehört anna:extern mit 770. tim ist weder Besitzer noch in extern – für ihn gilt others ---.",
+        "tim fehlt das x auf /srv/projekt.",
+        "tim müsste sudo verwenden, weil austausch anna gehört.",
+        "Die Gruppe projekt hat auf austausch nur r-x."
+      ],
+      "hints": [],
+      "solutions": [
+        "austausch gehört anna:extern mit 770. tim ist weder Besitzer noch in extern – für ihn gilt others ---."
+      ],
+      "explanation": "Der Weg ist für tim frei (projekt), das Ziel nicht.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "austausch gehört anna:extern mit 770. tim ist weder Besitzer noch in extern – für ihn gilt others ---."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-22-anna-c",
+      "title": "Teil 7 · Aufgabe 22 Begründung",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nBegründen Sie: Warum kann **anna** in `/srv/projekt/code/build` keine Datei anlegen (Zeile c)?",
+      "choices": [
+        "build gehört ben:projekt mit 755. Für anna gilt die Gruppe projekt mit r-x – es fehlt w zum Anlegen.",
+        "anna fehlt das x auf /srv/projekt/code.",
+        "anna ist Projektleiterin und hat deshalb bewusst nur Leserechte.",
+        "Weil das SGID-Bit an doku auch für code gilt."
+      ],
+      "hints": [],
+      "solutions": [
+        "build gehört ben:projekt mit 755. Für anna gilt die Gruppe projekt mit r-x – es fehlt w zum Anlegen."
+      ],
+      "explanation": "Anlegen braucht w und x im Zielverzeichnis.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "build gehört ben:projekt mit 755. Für anna gilt die Gruppe projekt mit r-x – es fehlt w zum Anlegen."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-23-1",
+      "title": "Teil 7 · Aufgabe 23.1",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDie Aussage ist **falsch**. Wählen Sie die richtige Korrektur mit Begründung:\n„`ben` kann in `/srv/projekt/doku` keine Dateien anlegen.“",
+      "choices": [
+        "ben kann in /srv/projekt/doku Dateien anlegen: Die Gruppe projekt hat rwx (2770), ben ist Mitglied, der Weg ist frei (r-x auf /srv/projekt).",
+        "ben kann in /srv/projekt/doku Dateien anlegen, weil er Mitglied in extern ist.",
+        "ben kann in /srv/projekt/doku nur mit sudo Dateien anlegen.",
+        "ben kann in /srv/projekt/doku Dateien anlegen, weil das SGID-Bit allen Schreibrecht gibt."
+      ],
+      "hints": [],
+      "solutions": [
+        "ben kann in /srv/projekt/doku Dateien anlegen: Die Gruppe projekt hat rwx (2770), ben ist Mitglied, der Weg ist frei (r-x auf /srv/projekt)."
+      ],
+      "explanation": "Bei Aussagen mit Verneinung zuerst festhalten, was behauptet wird, und erst dann prüfen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ben kann in /srv/projekt/doku Dateien anlegen: Die Gruppe projekt hat rwx (2770), ben ist Mitglied, der Weg ist frei (r-x auf /srv/projekt)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-23-2",
+      "title": "Teil 7 · Aufgabe 23.2",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDie Aussage ist **falsch**. Wählen Sie die richtige Korrektur mit Begründung:\n„`carla` kann `/srv/projekt/austausch` auflisten, weil sie Mitglied der Gruppe `extern` ist.“",
+      "choices": [
+        "carla kann austausch nicht auflisten: Ihr fehlt x auf /srv/projekt. Die Mitgliedschaft in extern nützt nichts, wenn der Weg versperrt ist.",
+        "carla kann austausch nicht auflisten, weil extern auf austausch nur r-x hat.",
+        "carla kann austausch auflisten, aber nur mit ls -l.",
+        "carla kann austausch nicht auflisten, weil anna die Besitzerin ist."
+      ],
+      "hints": [],
+      "solutions": [
+        "carla kann austausch nicht auflisten: Ihr fehlt x auf /srv/projekt. Die Mitgliedschaft in extern nützt nichts, wenn der Weg versperrt ist."
+      ],
+      "explanation": "x muss auf jedem übergeordneten Verzeichnis vorhanden sein.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "carla kann austausch nicht auflisten: Ihr fehlt x auf /srv/projekt. Die Mitgliedschaft in extern nützt nichts, wenn der Weg versperrt ist."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-23-3",
+      "title": "Teil 7 · Aufgabe 23.3",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDie Aussage ist **falsch**. Wählen Sie die richtige Korrektur mit Begründung:\n„`tim` kann nicht in das Verzeichnis `/srv/projekt/code/build` wechseln.“",
+      "choices": [
+        "tim kann in build wechseln: Als Mitglied von projekt hat er dort r-x (755), und x genügt zum Wechseln.",
+        "tim kann in build wechseln, weil er in der Gruppe sudo ist.",
+        "tim kann in build wechseln, weil others auf build r-x hat – die Gruppe spielt keine Rolle.",
+        "tim kann in build wechseln, aber nur mit sudo cd."
+      ],
+      "hints": [],
+      "solutions": [
+        "tim kann in build wechseln: Als Mitglied von projekt hat er dort r-x (755), und x genügt zum Wechseln."
+      ],
+      "explanation": "Auch der Weg ist frei: /srv/projekt (r-x) und code (rwx) über die Gruppe projekt.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "tim kann in build wechseln: Als Mitglied von projekt hat er dort r-x (755), und x genügt zum Wechseln."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-23-4",
+      "title": "Teil 7 · Aufgabe 23.4",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDie Aussage ist **falsch**. Wählen Sie die richtige Korrektur mit Begründung:\n„`anna` kann in `/srv/projekt/code/build` Dateien anlegen, da sie Mitglied der Gruppe `projekt` ist.“",
+      "choices": [
+        "anna kann in build keine Dateien anlegen: Die Gruppe projekt hat dort nur r-x, es fehlt w.",
+        "anna kann in build keine Dateien anlegen, weil ihr x auf code fehlt.",
+        "anna kann in build Dateien anlegen, aber nur als Besitzerin von /srv/projekt.",
+        "anna kann in build keine Dateien anlegen, weil sie nicht in extern ist."
+      ],
+      "hints": [],
+      "solutions": [
+        "anna kann in build keine Dateien anlegen: Die Gruppe projekt hat dort nur r-x, es fehlt w."
+      ],
+      "explanation": "„Kann keine Dateien anlegen“ bedeutet: w oder x fehlt irgendwo im Weg oder im Zielverzeichnis.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "anna kann in build keine Dateien anlegen: Die Gruppe projekt hat dort nur r-x, es fehlt w."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-24a-analyse",
+      "title": "Teil 7 · Aufgabe 24a",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nCarla meldet ein Problem.\n```\ncarla@srv01:~$ ls /srv/projekt/austausch\nls: Zugriff auf '/srv/projekt/austausch' nicht möglich: Keine Berechtigung\n```\nWarum hat `carla` keinen Zugriff, obwohl sie Mitglied der Gruppe `extern` ist?",
+      "choices": [
+        "carla fällt bei /srv/projekt (root:projekt, 750) in die Klasse others mit ---. Ohne x auf einem Verzeichnis im Pfad erreicht sie austausch nicht.",
+        "extern hat auf austausch nur Leserechte, aber kein x.",
+        "carla müsste sich nach der Aufnahme in extern neu anmelden.",
+        "austausch gehört anna, deshalb dürfen andere nur mit sudo zugreifen."
+      ],
+      "hints": [],
+      "solutions": [
+        "carla fällt bei /srv/projekt (root:projekt, 750) in die Klasse others mit ---. Ohne x auf einem Verzeichnis im Pfad erreicht sie austausch nicht."
+      ],
+      "explanation": "Auf austausch selbst hätte sie als Mitglied von extern rwx.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "carla fällt bei /srv/projekt (root:projekt, 750) in die Klasse others mit ---. Ohne x auf einem Verzeichnis im Pfad erreicht sie austausch nicht."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-24b-projekt",
+      "title": "Teil 7 · Aufgabe 24b",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\n```\ncarla@srv01:~$ ls /srv/projekt/austausch\nls: Zugriff auf '/srv/projekt/austausch' nicht möglich: Keine Berechtigung\n```\nWarum wäre es keine gute Lösung, `carla` in die Gruppe `projekt` aufzunehmen?",
+      "choices": [
+        "Als Mitglied von projekt hätte carla Zugriff auf doku und code, also auf alle Projektdaten – viel mehr als nötig (Prinzip der minimalen Rechte).",
+        "Weil carla dann aus extern entfernt würde.",
+        "Weil eine externe Mitarbeiterin technisch nicht in zwei Gruppen sein kann.",
+        "Weil sie dann trotzdem kein x auf /srv/projekt hätte."
+      ],
+      "hints": [],
+      "solutions": [
+        "Als Mitglied von projekt hätte carla Zugriff auf doku und code, also auf alle Projektdaten – viel mehr als nötig (Prinzip der minimalen Rechte)."
+      ],
+      "explanation": "Least Privilege: nur so viel öffnen wie nötig.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "Als Mitglied von projekt hätte carla Zugriff auf doku und code, also auf alle Projektdaten – viel mehr als nötig (Prinzip der minimalen Rechte)."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-24c-ox",
+      "title": "Teil 7 · Aufgabe 24c",
+      "category": "access",
+      "type": "terminal",
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ],
+      "text": "Die Projektleitung erlaubt ausdrücklich, dass **alle** Benutzer `/srv/projekt` **durchqueren**, aber **nicht auflisten** dürfen. Führen Sie den Befehl als `tim` aus.",
+      "hints": [],
+      "solutions": [
+        "sudo chmod o+x /srv/projekt"
+      ],
+      "explanation": "x ohne r: durchqueren erlaubt, auflisten nicht. Sparsamste Lösung – nur ein einziges Recht an einer Stelle. Danach gilt `drwxr-x--x` (751).",
+      "check": {
+        "type": "mode",
+        "path": "/srv/projekt",
+        "mode": "751"
+      }
+    },
+    {
+      "id": "u2-24d",
+      "title": "Teil 7 · Aufgabe 24d",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDer Befehl aus 24c ist ausgeführt (`/srv/projekt` jetzt `drwxr-x--x`, 751) und gilt als neue Ausgangslage. Kann **carla**:\n(1) `/srv/projekt/austausch` auflisten\n(2) `/srv/projekt` auflisten\n(3) in `/srv/projekt/doku` wechseln\n(4) in `/srv/projekt/code` wechseln\nAntwort z. B. `ja, nein, ja, nein`",
+      "hints": [],
+      "solutions": [
+        "ja, nein, nein, nein"
+      ],
+      "explanation": "(1) x für others auf /srv/projekt, auf austausch hat extern (carla) rwx. (2) others haben nur `--x`, kein r. (3) others haben auf doku `---`. (4) others haben auf code `---`.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "ja, nein, nein, nein"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt",
+        "chmod o+x /srv/projekt"
+      ]
+    },
+    {
+      "id": "u2-25-steps",
+      "title": "Teil 7 · Aufgabe 25",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nWie gehen Sie vor, um zu prüfen, ob eine Person auf ein Ziel zugreifen kann (zum Beispiel eine Datei in einem Unterverzeichnis anlegen)?",
+      "choices": [
+        "1. Für jedes Verzeichnis/jede Datei im Pfad die Klasse bestimmen (Besitzer, sonst Gruppe, sonst others – erster Treffer gilt). 2. Rechte der Klasse mit dem Bedarf vergleichen. 3. Den ganzen Pfad prüfen: x auf jedem übergeordneten Verzeichnis ab /.",
+        "1. Nur das Zielverzeichnis prüfen. 2. Rechte von Besitzer, Gruppe und others addieren. 3. Wenn irgendeine Klasse das Recht hat, klappt es.",
+        "1. Prüfen, ob die Person in sudo ist. 2. Wenn nicht, die others-Rechte des Ziels prüfen. 3. Fertig.",
+        "1. Die Rechte der Datei prüfen. 2. Die umask der Person prüfen. 3. Die Primärgruppe prüfen."
+      ],
+      "hints": [],
+      "solutions": [
+        "1. Für jedes Verzeichnis/jede Datei im Pfad die Klasse bestimmen (Besitzer, sonst Gruppe, sonst others – erster Treffer gilt). 2. Rechte der Klasse mit dem Bedarf vergleichen. 3. Den ganzen Pfad prüfen: x auf jedem übergeordneten Verzeichnis ab /."
+      ],
+      "explanation": "Bei einem Zugriffsproblem hilft `ls -ld` für jeden Teil des Pfades. Eine einzige fehlende Stelle genügt, damit der Zugriff scheitert.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "1. Für jedes Verzeichnis/jede Datei im Pfad die Klasse bestimmen (Besitzer, sonst Gruppe, sonst others – erster Treffer gilt). 2. Rechte der Klasse mit dem Bedarf vergleichen. 3. Den ganzen Pfad prüfen: x auf jedem übergeordneten Verzeichnis ab /."
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    },
+    {
+      "id": "u2-25-rights",
+      "title": "Teil 7 · Aufgabe 25",
+      "category": "access",
+      "type": "question",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nWelche Rechte braucht man jeweils im betroffenen Verzeichnis bzw. an der Datei für: **Wechseln, Auflisten, Datei lesen, Anlegen**? (Antwort z. B. `r, w, x, rw`)",
+      "hints": [],
+      "solutions": [
+        "x, r, r, wx"
+      ],
+      "explanation": "Wechseln: x. Auflisten: r. Lesen einer Datei: r. Anlegen und Löschen: w und x im Verzeichnis. Dazu immer x auf allen übergeordneten Verzeichnissen.",
+      "check": {
+        "type": "answer",
+        "accepted": [
+          "x, r, r, wx",
+          "x, r, r, w+x",
+          "x, r, r, xw",
+          "x, r, r, w und x",
+          "x, r, r, -wx"
+        ]
+      },
+      "scenario": "uebung2",
+      "user": "tim",
+      "setup": [
+        "adduser tim projekt",
+        "usermod -aG extern ben",
+        "chmod g+s /srv/projekt/doku",
+        "chgrp projekt /srv/projekt/doku/konzept.txt"
+      ]
+    }
+  ]
+}

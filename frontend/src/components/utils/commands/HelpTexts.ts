@@ -6,16 +6,28 @@ export type HelpTextModel = {
 };
 
 export const HELP_TEXTS: Record<string, HelpTextModel> = {
+    addgroup: {
+        summary: "Gruppe anlegen oder Benutzer zu einer Gruppe hinzufügen",
+        synopsis: "addgroup [--gid GID] GRUPPE  |  addgroup BENUTZER GRUPPE",
+        description: [
+            "Mit einem Argument wird eine neue Gruppe angelegt.",
+            "--gid GID: When creating a group, this option sets the group ID number of the new group to GID.",
+            "Mit zwei Argumenten wird BENUTZER zur GRUPPE hinzugefügt (wie adduser).",
+            "Braucht root-Rechte, also meist mit sudo.",
+        ],
+        examples: ["sudo addgroup --gid 2011 tools", "sudo addgroup ben team"],
+    },
     adduser: {
         summary: "Benutzer anlegen oder zu einer Gruppe hinzufügen",
-        synopsis: "adduser BENUTZER [GRUPPE]",
+        synopsis: "adduser [--gid GID] BENUTZER [GRUPPE]",
         description: [
             "Mit einem Argument wird ein neuer Benutzer samt Primärgruppe und Home angelegt.",
+            "--gid GID: When creating a user, this option sets the primary group ID number of the new user to GID.",
             "Mit zwei Argumenten wird BENUTZER zur GRUPPE hinzugefügt.",
             "Braucht root-Rechte, also meist mit sudo.",
             "Die neue Gruppe wirkt erst nach erneutem Einloggen.",
         ],
-        examples: ["sudo adduser clara team"],
+        examples: ["sudo adduser clara team", "sudo adduser --gid 2001 mkeller"],
     },
     cat: {
         summary: "Dateiinhalt ausgeben",

@@ -14,6 +14,11 @@ export const KNOWN_HOSTS: HostModel[] = [
     { name: "localhost", ip: "127.0.0.1", reachable: true, isLocal: true },
     { name: "server", ip: "192.168.0.10", reachable: true, isLocal: false },
     { name: "drucker", ip: "192.168.0.99", reachable: false, isLocal: false },
+    // Rechner aus den Übungen (Probeklausuren)
+    { name: "web01", ip: "192.168.20.10", reachable: true, isLocal: true },
+    { name: "nas01", ip: "192.168.20.30", reachable: false, isLocal: false },
+    { name: "srv01", ip: "192.168.10.5", reachable: true, isLocal: true },
+    { name: "lightning", ip: "172.30.4.1", reachable: true, isLocal: true },
 ];
 
 export function findHost(nameOrIp: string): HostModel | undefined {
@@ -47,8 +52,8 @@ export function newSession(state: ShellStateModel, user: string, openedBy: Sessi
         home,
         cwd: homeExists ? home : "/",
         previousCwd: homeExists ? home : "/",
-        umask: user === "root" ? 0o022 : 0o002,
-        hostname: "pi",
+        umask: state.fs.umaskFor(user),
+        hostname: state.fs.hostname,
         openedBy,
     };
 }
@@ -68,7 +73,7 @@ export function closeSession(state: ShellStateModel): string[] {
 
     if (previous) {
         applySession(state, previous);
-        return closed === "ssh" ? ["logout", "Connection to pi closed."] : ["exit"];
+        return closed === "ssh" ? ["logout", `Connection to ${state.fs.hostname} closed.`] : ["exit"];
     }
 
     // Letzte Sitzung: wie Ab- und wieder Anmelden, Gruppen werden neu gelesen

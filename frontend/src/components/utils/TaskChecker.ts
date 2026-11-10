@@ -6,7 +6,7 @@ import { createFileSystem, createShellState } from "./filesystem/FileSystemFacto
 
 /** Ausgangslage einer Aufgabe: frisches System, Setup als root, dann Login als Aufgaben-Benutzer */
 export function createTaskState(task: TaskModel): ShellStateModel {
-    const fs = createFileSystem();
+    const fs = createFileSystem(task.scenario);
     const rootState = createShellState("root", fs);
     rootState.cwd = "/";
     for (const command of task.setup ?? []) {
@@ -22,14 +22,16 @@ export function createTaskState(task: TaskModel): ShellStateModel {
     return state;
 }
 
-/** Klein, ohne doppelte Leerzeichen, ohne Leerzeichen um Kommas, ohne Punkt am Ende */
+/**
+ * Klein, ohne Punkt am Ende. Leerzeichen, Komma und Semikolon gelten als derselbe Trenner,
+ * damit "rwx, r-x, ---", "rwx r-x ---" und "rwx;r-x;---" gleich bewertet werden.
+ */
 export function normalizeAnswer(answer: string): string {
     return answer
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, " ")
-        .replace(/\s*,\s*/g, ",")
-        .replace(/\.$/, "");
+        .replace(/\.$/, "")
+        .replace(/\s*[,;]\s*|\s+/g, ",");
 }
 
 function normalizeCommand(line: string): string {
@@ -65,6 +67,8 @@ function checkState(check: TaskCheckModel, state: ShellStateModel, lastCommand: 
             return false;
         case "all":
             return check.checks.every((part) => checkState(part, state, lastCommand));
+        case "any":
+            return check.checks.some((part) => checkState(part, state, lastCommand));
     }
 }
 
