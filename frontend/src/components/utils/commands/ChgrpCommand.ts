@@ -3,8 +3,8 @@ import { usageError } from "./CommandHelpers.ts";
 import { runOwnershipCommand } from "./ChownCommand.ts";
 
 export const chgrpCommand: Command = (args, state) => {
-    const recursive = args.includes("-R");
-    const rest = args.filter((arg) => arg !== "-R");
+    const recursive = args.includes("-R") || args.includes("--recursive");
+    const rest = args.filter((arg) => arg !== "-R" && arg !== "--recursive");
     if (rest.length === 0) return usageError("chgrp", "missing operand");
     if (rest.length === 1) return usageError("chgrp", `missing operand after '${rest[0]}'`);
 

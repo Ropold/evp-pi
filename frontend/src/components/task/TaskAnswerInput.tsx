@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type KeyboardEvent } from "react";
 import { shuffle } from "../utils/Shuffle.ts";
 import TaskFormattedText from "./TaskFormattedText.tsx";
 
@@ -19,6 +19,14 @@ export default function TaskAnswerInput({ choices, multiline = false, disabled, 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
         if (answer.trim()) onAnswer(answer);
+    };
+
+    // Enter schickt ab, Shift+Enter macht eine neue Zeile
+    const handleTextareaKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            if (answer.trim()) onAnswer(answer);
+        }
     };
 
     if (shuffledChoices) {
@@ -43,7 +51,7 @@ export default function TaskAnswerInput({ choices, multiline = false, disabled, 
     if (multiline) {
         return (
             <form className="task-answer" onSubmit={handleSubmit}>
-                <label htmlFor="task-answer-input">Deine Antwort (in eigenen Worten)</label>
+                <label htmlFor="task-answer-input">Deine Antwort (in eigenen Worten) – Enter vergleicht, Shift+Enter = neue Zeile</label>
                 <textarea
                     id="task-answer-input"
                     className="task-answer-text"
@@ -52,6 +60,7 @@ export default function TaskAnswerInput({ choices, multiline = false, disabled, 
                     spellCheck={false}
                     disabled={disabled}
                     onChange={(event) => setAnswer(event.target.value)}
+                    onKeyDown={handleTextareaKey}
                 />
                 <div className="task-buttons">
                     <button type="submit" className="button button-primary" disabled={disabled || !answer.trim()}>

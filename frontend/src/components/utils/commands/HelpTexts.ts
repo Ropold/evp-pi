@@ -1,287 +1,356 @@
 export type HelpTextModel = {
+    /** Einzeiler für help und NAME in der man-Page */
     summary: string;
-    synopsis: string;
+    /** Aufruf-Zeile(n) wie bei echtem --help */
+    synopsis: string[];
+    /** Beschreibung direkt nach dem Aufruf */
     description: string[];
+    /** Optionen: [Schreibweise, Bedeutung] */
+    options?: [string, string][];
+    /** Zusätzliche Hinweise (Rechte, Besonderheiten) */
+    notes?: string[];
     examples: string[];
 };
 
 export const HELP_TEXTS: Record<string, HelpTextModel> = {
     addgroup: {
         summary: "Gruppe anlegen oder Benutzer zu einer Gruppe hinzufügen",
-        synopsis: "addgroup [--gid GID] GRUPPE  |  addgroup BENUTZER GRUPPE",
+        synopsis: ["addgroup [--gid ID] GRUPPE", "addgroup BENUTZER GRUPPE"],
         description: [
             "Mit einem Argument wird eine neue Gruppe angelegt.",
-            "--gid GID: When creating a group, this option sets the group ID number of the new group to GID.",
-            "Mit zwei Argumenten wird BENUTZER zur GRUPPE hinzugefügt (wie adduser).",
-            "Braucht root-Rechte, also meist mit sudo.",
+            "Mit zwei Argumenten wird ein vorhandener BENUTZER zu einer vorhandenen GRUPPE hinzugefügt (wie adduser BENUTZER GRUPPE).",
         ],
-        examples: ["sudo addgroup --gid 2011 tools", "sudo addgroup ben team"],
+        options: [
+            ["--gid ID", "When creating a group, this option sets the group ID number of the new group to GID."],
+            ["", "(GID = numerische Gruppen-ID, z. B. 2011 – kein Gruppenname)"],
+        ],
+        examples: ["sudo addgroup --gid 3000 labor", "sudo addgroup clara labor"],
     },
     adduser: {
         summary: "Benutzer anlegen oder zu einer Gruppe hinzufügen",
-        synopsis: "adduser [--gid GID] BENUTZER [GRUPPE]",
+        synopsis: ["adduser [--gid ID] BENUTZER", "adduser BENUTZER GRUPPE"],
         description: [
-            "Mit einem Argument wird ein neuer Benutzer samt Primärgruppe und Home angelegt.",
-            "--gid GID: When creating a user, this option sets the primary group ID number of the new user to GID.",
-            "Mit zwei Argumenten wird BENUTZER zur GRUPPE hinzugefügt.",
-            "Braucht root-Rechte, also meist mit sudo.",
-            "Die neue Gruppe wirkt erst nach erneutem Einloggen.",
+            "Mit einem Argument wird ein neuer Benutzer angelegt: Benutzerkonto, gleichnamige Primärgruppe und Home-Verzeichnis /home/BENUTZER.",
+            "Mit zwei Argumenten wird ein vorhandener BENUTZER zur vorhandenen GRUPPE hinzugefügt (weitere Gruppe).",
         ],
-        examples: ["sudo adduser clara team", "sudo adduser --gid 2001 mkeller"],
+        options: [
+            ["--gid ID", "When creating a user, this option sets the primary group ID number of the new user to GID."],
+            ["", "(GID = numerische Gruppen-ID, kein Gruppenname)"],
+        ],
+        examples: ["sudo adduser clara", "sudo adduser clara labor", "sudo adduser --gid 3000 clara"],
     },
     cat: {
-        summary: "Dateiinhalt ausgeben",
-        synopsis: "cat DATEI...",
-        description: ["Gibt den Inhalt der Dateien aus. Braucht r auf der Datei."],
-        examples: ["cat /etc/group"],
+        summary: "Dateien verketten und ausgeben",
+        synopsis: ["cat [DATEI]..."],
+        description: ["Gibt den Inhalt der DATEIen auf der Standardausgabe aus."],
+        examples: ["cat /etc/group", "cat bericht.txt"],
     },
     cd: {
-        summary: "Arbeitsverzeichnis wechseln",
-        synopsis: "cd [VERZEICHNIS]",
+        summary: "Arbeitsverzeichnis wechseln (Shell-Befehl)",
+        synopsis: ["cd [VERZEICHNIS]"],
         description: [
-            "Ohne Argument geht es ins Home (~). cd - wechselt ins vorherige Verzeichnis.",
-            ". ist das aktuelle, .. das übergeordnete Verzeichnis.",
-            "Braucht x auf dem Ziel und auf jedem Verzeichnis im Pfad.",
+            "Wechselt das aktuelle Arbeitsverzeichnis zu VERZEICHNIS.",
+            "Ohne VERZEICHNIS (oder mit ~) wird ins Home-Verzeichnis gewechselt. cd - wechselt ins vorherige Verzeichnis.",
+            "Pfade mit / am Anfang sind absolut (ab /), alle anderen relativ zum aktuellen Verzeichnis.",
+            ". = aktuelles Verzeichnis, .. = übergeordnetes Verzeichnis, ~ = Home-Verzeichnis.",
         ],
-        examples: ["cd /projekt", "cd ..", "cd ~"],
+        examples: ["cd /var/log", "cd ..", "cd ../archiv", "cd ~"],
     },
     chgrp: {
-        summary: "Gruppe einer Datei ändern",
-        synopsis: "chgrp [-R] GRUPPE DATEI...",
-        description: [
-            "Der Besitzer darf die Gruppe auf eine Gruppe ändern, in der er selbst Mitglied ist.",
-            "Sonst braucht man root (sudo).",
-        ],
-        examples: ["chgrp team bericht.txt"],
+        summary: "Gruppenzugehörigkeit ändern",
+        synopsis: ["chgrp [OPTION]... GRUPPE DATEI..."],
+        description: ["Ändert die Gruppe jeder DATEI auf GRUPPE."],
+        options: [["-R, --recursive", "Dateien und Verzeichnisse rekursiv bearbeiten"]],
+        examples: ["chgrp labor liste.txt", "chgrp -R labor /daten/labor"],
     },
     chmod: {
-        summary: "Zugriffsrechte ändern",
-        synopsis: "chmod [-R] MODUS DATEI...",
+        summary: "Zugriffsrechte von Dateien ändern",
+        synopsis: ["chmod [OPTION]... MODUS[,MODUS]... DATEI...", "chmod [OPTION]... OKTAL-MODUS DATEI..."],
         description: [
-            "MODUS oktal: 4 = r, 2 = w, 1 = x, je Ziffer für Besitzer, Gruppe, others (z. B. 750).",
-            "Vierte Ziffer davor für Spezialbits: 4 = SUID, 2 = SGID, 1 = Sticky (z. B. 2775).",
-            "MODUS symbolisch: [ugoa][+-=][rwxXst], mehrere mit Komma (z. B. u=rwx,g=rx,o=).",
-            "Nur der Besitzer oder root darf die Rechte ändern.",
+            "Ändert die Zugriffsrechte jeder DATEI auf MODUS.",
+            "",
+            "Oktal: je eine Ziffer für Besitzer (u), Gruppe (g), others (o); r = 4, w = 2, x = 1.",
+            "  Beispiel: 750 = rwx r-x ---",
+            "  Eine vierte Ziffer davor setzt Spezialbits: 4 = SUID, 2 = SGID, 1 = Sticky-Bit (z. B. 2770, 1777).",
+            "",
+            "Symbolisch: [ugoa...][[-+=][rwxXst...]...][,...]",
+            "  u = Besitzer, g = Gruppe, o = others, a = alle",
+            "  + fügt Rechte hinzu, - entfernt sie, = setzt genau diese Rechte",
+            "  s bei g = SGID, s bei u = SUID, t = Sticky-Bit",
+            "  Ohne Rechte hinter = werden alle Rechte entfernt (z. B. go=).",
         ],
-        examples: ["chmod 700 privat", "chmod g+s gemeinsam", "chmod o-rwx datei.txt"],
+        options: [["-R, --recursive", "Dateien und Verzeichnisse rekursiv ändern"]],
+        examples: ["chmod 750 archiv", "chmod g+w liste.txt", "chmod o-r liste.txt", "chmod u=rw,go= notizen.txt", "chmod g+s gemeinsam", "chmod +t ablage"],
     },
     chown: {
-        summary: "Besitzer und Gruppe ändern",
-        synopsis: "chown [-R] BESITZER[:GRUPPE] DATEI...",
+        summary: "Besitzer und Gruppe von Dateien ändern",
+        synopsis: ["chown [OPTION]... [BESITZER][:[GRUPPE]] DATEI..."],
         description: [
-            "BESITZER:GRUPPE ändert beides, :GRUPPE nur die Gruppe, BESITZER: setzt dessen Primärgruppe.",
-            "Den Besitzer ändern darf nur root (sudo).",
+            "Ändert Besitzer und/oder Gruppe jeder DATEI.",
+            "  BESITZER         nur der Besitzer wird geändert",
+            "  BESITZER:GRUPPE  Besitzer und Gruppe werden geändert",
+            "  :GRUPPE          nur die Gruppe wird geändert (wie chgrp)",
+            "  BESITZER:        Besitzer und dessen Primärgruppe",
         ],
-        examples: ["sudo chown ben:team abgabe.txt", "chown :team notizen.txt"],
+        options: [["-R, --recursive", "Dateien und Verzeichnisse rekursiv bearbeiten"]],
+        examples: ["sudo chown clara:labor liste.txt", "sudo chown clara liste.txt", "chown :labor liste.txt"],
     },
     clear: {
         summary: "Bildschirm leeren",
-        synopsis: "clear",
+        synopsis: ["clear"],
         description: ["Leert das Terminal. Alternativ Strg+L."],
         examples: ["clear"],
     },
     cp: {
         summary: "Dateien und Verzeichnisse kopieren",
-        synopsis: "cp [-r] QUELLE... ZIEL",
-        description: [
-            "Verzeichnisse nur mit -r. Die Kopie gehört dir, die Rechte kommen von der Quelle minus umask.",
-            "Braucht r auf der Quelle sowie w und x auf dem Zielverzeichnis.",
+        synopsis: ["cp [OPTION]... QUELLE ZIEL", "cp [OPTION]... QUELLE... VERZEICHNIS"],
+        description: ["Kopiert QUELLE nach ZIEL oder mehrere QUELLEn in VERZEICHNIS. Das Original bleibt erhalten."],
+        options: [
+            ["-a", "wie -r, Besitzer und Rechte bleiben möglichst erhalten"],
+            ["-i, --interactive", "vor dem Überschreiben nachfragen"],
+            ["-R, -r, --recursive", "Verzeichnisse rekursiv kopieren"],
+            ["-v, --verbose", "erklären, was gemacht wird"],
         ],
-        examples: ["cp /projekt/plan.txt ~", "cp -r dokumente sicherung"],
+        examples: ["cp liste.txt /tmp/", "cp -r dokumente sicherung"],
     },
     echo: {
-        summary: "Text ausgeben",
-        synopsis: "echo [TEXT...]",
-        description: ["Gibt den Text aus. Mit > datei wird in eine Datei geschrieben, mit >> angehängt."],
+        summary: "Eine Textzeile ausgeben",
+        synopsis: ["echo [TEXT]..."],
+        description: ["Gibt TEXT aus. Mit > datei wird in eine Datei geschrieben, mit >> angehängt."],
         examples: ["echo hallo > gruss.txt"],
     },
     exit: {
-        summary: "Sitzung beenden",
-        synopsis: "exit",
+        summary: "Sitzung beenden (Shell-Befehl)",
+        synopsis: ["exit"],
         description: [
-            "Beendet eine ssh- oder su-Sitzung und kehrt zur vorherigen zurück.",
-            "In der ersten Sitzung: Abmelden und neu anmelden (Gruppen werden neu gelesen).",
+            "Beendet eine ssh-, su- oder sudo -i-Sitzung und kehrt zur vorherigen zurück.",
+            "In der ersten Sitzung: abmelden und neu anmelden – dabei werden die Gruppen neu gelesen.",
         ],
         examples: ["exit"],
     },
     groups: {
-        summary: "Gruppen anzeigen",
-        synopsis: "groups [BENUTZER]",
-        description: ["Ohne Argument: Gruppen der aktuellen Sitzung. Mit Benutzer: Gruppen laut /etc/group."],
+        summary: "Gruppenzugehörigkeit von Benutzern anzeigen",
+        synopsis: ["groups [BENUTZER]..."],
+        description: [
+            "Zeigt die Gruppen jedes BENUTZERs (laut /etc/group).",
+            "Ohne BENUTZER: die Gruppen der aktuellen Sitzung.",
+        ],
         examples: ["groups", "groups ben"],
     },
     help: {
         summary: "Verfügbare Befehle anzeigen",
-        synopsis: "help",
+        synopsis: ["help"],
         description: ["Listet alle Befehle der Simulation mit kurzer Beschreibung."],
         examples: ["help"],
     },
     hostname: {
         summary: "Rechnernamen anzeigen",
-        synopsis: "hostname",
+        synopsis: ["hostname"],
         description: ["Gibt den Namen des Rechners aus."],
         examples: ["hostname"],
     },
     id: {
-        summary: "UID, GID und Gruppen anzeigen",
-        synopsis: "id [-u|-g|-G] [-n] [BENUTZER]",
+        summary: "Benutzer- und Gruppen-IDs anzeigen",
+        synopsis: ["id [OPTION]... [BENUTZER]"],
         description: [
-            "Zeigt uid, gid (Primärgruppe) und groups (alle Gruppen).",
-            "Ohne Benutzer: Werte der aktuellen Sitzung. Neue Gruppen erscheinen erst nach erneutem Einloggen.",
+            "Zeigt Benutzer- und Gruppeninformationen für BENUTZER bzw. ohne BENUTZER für die aktuelle Sitzung.",
+            "  uid = Benutzer-ID, gid = Primärgruppe, Gruppen = alle Gruppen (Primärgruppe und weitere)",
         ],
-        examples: ["id", "id ben"],
+        options: [
+            ["-g, --group", "nur die ID der Primärgruppe ausgeben"],
+            ["-G, --groups", "alle Gruppen-IDs ausgeben"],
+            ["-n, --name", "Namen statt Nummern ausgeben (mit -u, -g oder -G)"],
+            ["-u, --user", "nur die Benutzer-ID ausgeben"],
+        ],
+        examples: ["id", "id ben", "id -Gn tim"],
     },
     ls: {
-        summary: "Verzeichnisinhalt auflisten",
-        synopsis: "ls [-l] [-a] [-d] [DATEI...]",
-        description: [
-            "-l  ausführlich: Typ+Rechte, Links, Besitzer, Gruppe, Größe, Datum, Name",
-            "-a  auch versteckte Einträge (., .. und Namen mit Punkt)",
-            "-d  Verzeichnis selbst statt Inhalt anzeigen",
-            "Auflisten braucht r auf dem Verzeichnis, für -l zusätzlich x.",
+        summary: "Verzeichnisinhalte auflisten",
+        synopsis: ["ls [OPTION]... [DATEI]..."],
+        description: ["Auflistung der DATEIen (standardmäßig das aktuelle Verzeichnis)."],
+        options: [
+            ["-a, --all", "Einträge, die mit . beginnen, nicht ignorieren"],
+            ["-d, --directory", "Verzeichnisse selbst auflisten, nicht deren Inhalt"],
+            ["-l", "ausführliches Listenformat verwenden"],
         ],
-        examples: ["ls -l /projekt", "ls -la", "ls -ld /projekt"],
+        notes: [
+            "Mehrere Optionen darf man zusammenschreiben, z. B. -la oder -ld.",
+            "Spalten bei -l: Typ+Rechte, Anzahl Links, Besitzer, Gruppe, Größe, Datum, Name.",
+            "  Typ: d = Verzeichnis, - = Datei. Rechte: je 3 Zeichen für Besitzer, Gruppe, others.",
+        ],
+        examples: ["ls -l /var", "ls -a", "ls -ld /var"],
     },
     man: {
-        summary: "Handbuchseite anzeigen",
-        synopsis: "man BEFEHL",
-        description: ["Zeigt die Handbuchseite. Kurzhilfe gibt es auch mit BEFEHL --help."],
-        examples: ["man chmod"],
+        summary: "Handbuchseiten anzeigen",
+        synopsis: ["man BEFEHL"],
+        description: ["Zeigt die ausführliche Handbuchseite (manual page) zu BEFEHL. Kurzhilfe: BEFEHL --help."],
+        examples: ["man chown", "man ls"],
     },
     mkdir: {
         summary: "Verzeichnisse anlegen",
-        synopsis: "mkdir [-p] VERZEICHNIS...",
-        description: [
-            "-p legt auch fehlende Elternverzeichnisse an.",
-            "Rechte: 777 minus umask. Mit SGID am Elternordner werden Gruppe und SGID geerbt.",
-            "Braucht w und x auf dem Elternverzeichnis.",
-        ],
-        examples: ["mkdir projekte", "mkdir -p a/b/c", "mkdir ../neu"],
+        synopsis: ["mkdir [OPTION]... VERZEICHNIS..."],
+        description: ["Legt die VERZEICHNISse an, falls sie noch nicht existieren."],
+        options: [["-p, --parents", "keinen Fehler, falls vorhanden; übergeordnete Verzeichnisse nach Bedarf anlegen"]],
+        examples: ["mkdir entwuerfe", "mkdir archiv/2024", "mkdir -p a/b/c"],
     },
     mv: {
-        summary: "Verschieben oder umbenennen",
-        synopsis: "mv QUELLE... ZIEL",
-        description: [
-            "Besitzer, Gruppe und Rechte bleiben erhalten.",
-            "Braucht w und x auf dem Quell- und dem Zielverzeichnis.",
+        summary: "Dateien verschieben oder umbenennen",
+        synopsis: ["mv [OPTION]... QUELLE ZIEL", "mv [OPTION]... QUELLE... VERZEICHNIS"],
+        description: ["Benennt QUELLE in ZIEL um oder verschiebt QUELLE(n) in VERZEICHNIS. Am alten Ort ist danach nichts mehr."],
+        options: [
+            ["-f, --force", "vor dem Überschreiben nicht nachfragen"],
+            ["-i, --interactive", "vor dem Überschreiben nachfragen"],
+            ["-v, --verbose", "erklären, was gemacht wird"],
         ],
-        examples: ["mv notizen.txt dokumente/", "mv alt.txt neu.txt"],
+        examples: ["mv liste.txt archiv/", "mv alt.txt neu.txt"],
     },
     ping: {
         summary: "Erreichbarkeit eines Rechners prüfen",
-        synopsis: "ping [-c ANZAHL] RECHNER",
+        synopsis: ["ping [-c ANZAHL] RECHNER"],
         description: [
-            "Löst den Namen auf und schickt Pakete. In der Simulation werden 4 Pakete gesendet.",
-            "\"Name or service not known\": Name konnte nicht aufgelöst werden.",
-            "\"Destination Host Unreachable\": Name bekannt, Rechner antwortet nicht.",
+            "Löst den Namen RECHNER in eine IP-Adresse auf und schickt Testpakete (ICMP Echo Request).",
+            "Antworten zeigen, dass der Rechner erreichbar ist.",
         ],
-        examples: ["ping server", "ping 192.168.0.10"],
+        options: [["-c ANZAHL", "nach ANZAHL Paketen aufhören (Standard in der Simulation: 4)"]],
+        examples: ["ping srv01", "ping -c 2 192.168.10.5"],
     },
     pwd: {
         summary: "Aktuelles Verzeichnis ausgeben",
-        synopsis: "pwd",
-        description: ["Gibt den absoluten Pfad des Arbeitsverzeichnisses aus."],
+        synopsis: ["pwd"],
+        description: ["Gibt den absoluten Pfad des aktuellen Arbeitsverzeichnisses aus."],
         examples: ["pwd"],
     },
     rm: {
-        summary: "Dateien und Verzeichnisse löschen",
-        synopsis: "rm [-r] [-f] DATEI...",
-        description: [
-            "Verzeichnisse nur mit -r. -f unterdrückt Fehler bei fehlenden Dateien.",
-            "Löschen braucht w und x auf dem Verzeichnis, in dem der Eintrag liegt, nicht auf der Datei.",
+        summary: "Dateien und Verzeichnisse entfernen",
+        synopsis: ["rm [OPTION]... DATEI..."],
+        description: ["Entfernt jede angegebene DATEI. Verzeichnisse werden nur mit -r entfernt."],
+        options: [
+            ["-f, --force", "nicht vorhandene Dateien ignorieren, nie nachfragen"],
+            ["-i", "vor jedem Entfernen nachfragen"],
+            ["-r, -R, --recursive", "Verzeichnisse und ihren Inhalt rekursiv entfernen"],
+            ["-v, --verbose", "erklären, was gemacht wird"],
         ],
-        examples: ["rm alt.txt", "rm -r entwuerfe"],
+        examples: ["rm liste.txt", "rm -r entwuerfe"],
     },
     rmdir: {
-        summary: "Leere Verzeichnisse löschen",
-        synopsis: "rmdir VERZEICHNIS...",
-        description: ["Löscht nur leere Verzeichnisse."],
+        summary: "Leere Verzeichnisse entfernen",
+        synopsis: ["rmdir VERZEICHNIS..."],
+        description: ["Entfernt die VERZEICHNISse, wenn sie leer sind."],
         examples: ["rmdir leer"],
     },
     ssh: {
-        summary: "Auf einem Rechner anmelden",
-        synopsis: "ssh [BENUTZER@]RECHNER",
+        summary: "Per Secure Shell an einem Rechner anmelden",
+        synopsis: ["ssh [BENUTZER@]RECHNER"],
         description: [
-            "Meldet dich als BENUTZER an. RECHNER ist ein Name oder eine IP.",
-            "In der Simulation ist nur pi (192.168.0.42, localhost) per ssh erreichbar. Mit exit zurück.",
+            "Meldet BENUTZER am RECHNER an. RECHNER ist ein Rechnername oder eine IP-Adresse.",
+            "Ohne BENUTZER@ wird der aktuelle Benutzername verwendet. Mit exit kehrt man zurück.",
         ],
-        examples: ["ssh ben@pi", "ssh anna@192.168.0.42"],
+        notes: [
+            "In der Simulation sind per ssh erreichbar: pi, srv01, web01, lightning (Name oder IP, siehe ping).",
+        ],
+        examples: ["ssh anna@pi", "ssh anna@192.168.0.42"],
     },
     su: {
         summary: "Benutzer wechseln",
-        synopsis: "su [-] [BENUTZER]",
-        description: [
-            "Wechselt zu BENUTZER (Standard: root). Braucht dessen Passwort.",
-            "In der Simulation gibt es keine Passwörter: nutze sudo su - BENUTZER oder ssh BENUTZER@pi.",
+        synopsis: ["su [-] [BENUTZER]"],
+        description: ["Startet eine Shell als BENUTZER (Standard: root). Braucht das Passwort von BENUTZER."],
+        options: [["-, -l, --login", "Login-Shell: ins Home von BENUTZER wechseln, wie bei einer neuen Anmeldung"]],
+        notes: [
+            "In der Simulation gibt es keine Passwörter: nutze sudo su - BENUTZER (als Mitglied von sudo).",
         ],
-        examples: ["sudo su - clara"],
+        examples: ["sudo su - clara", "exit"],
     },
     sudo: {
-        summary: "Befehl als root ausführen",
-        synopsis: "sudo [-u BENUTZER] BEFEHL | sudo -i",
+        summary: "Befehl als root (oder anderer Benutzer) ausführen",
+        synopsis: ["sudo [-u BENUTZER] BEFEHL", "sudo -i", "sudo -s"],
         description: [
-            "Führt BEFEHL mit root-Rechten aus. Nur für Mitglieder der Gruppe sudo.",
-            "Nur verwenden, wenn wirklich nötig, z. B. für chown oder adduser.",
-            "-i öffnet eine root-Shell, -u führt den Befehl als anderer Benutzer aus.",
+            "Führt BEFEHL mit root-Rechten aus. Erlaubt ist das nur Mitgliedern der Gruppe sudo.",
         ],
-        examples: ["sudo adduser clara team", "sudo -u clara ls /projekt"],
+        options: [
+            ["-i", "Login-Shell als root öffnen"],
+            ["-s", "Shell als root öffnen (im aktuellen Verzeichnis bleiben)"],
+            ["-u BENUTZER", "BEFEHL als BENUTZER statt als root ausführen"],
+        ],
+        examples: ["sudo chown clara liste.txt", "sudo -u clara ls /daten"],
     },
     touch: {
         summary: "Leere Datei anlegen oder Zeitstempel ändern",
-        synopsis: "touch DATEI...",
-        description: ["Neue Dateien bekommen 666 minus umask, mit SGID am Ordner dessen Gruppe."],
-        examples: ["touch neu.txt"],
+        synopsis: ["touch DATEI..."],
+        description: ["Legt jede DATEI leer an, falls sie nicht existiert; sonst wird nur der Zeitstempel aktualisiert."],
+        examples: ["touch liste.txt"],
     },
     umask: {
-        summary: "Standard-Rechtemaske anzeigen oder setzen",
-        synopsis: "umask [-S] [MASKE]",
+        summary: "Maske für die Rechte neuer Dateien anzeigen oder setzen (Shell-Befehl)",
+        synopsis: ["umask [-S] [MASKE]"],
         description: [
-            "Neue Dateien: 666 minus umask, neue Verzeichnisse: 777 minus umask.",
-            "Bei umask 0002: Dateien rw-rw-r--, Verzeichnisse rwxrwxr-x.",
+            "Zeigt oder setzt die Maske, die festlegt, welche Rechte bei neu angelegten Dateien und Verzeichnissen weggenommen werden.",
         ],
+        options: [["-S", "Maske symbolisch ausgeben (welche Rechte erlaubt bleiben)"]],
         examples: ["umask", "umask -S", "umask 0022"],
     },
     usermod: {
         summary: "Benutzerkonto ändern",
-        synopsis: "usermod -aG GRUPPE[,GRUPPE] BENUTZER",
-        description: [
-            "-aG fügt Gruppen hinzu. Ohne -a ersetzt -G alle weiteren Gruppen!",
-            "Braucht root-Rechte (sudo). Wirkt erst nach erneutem Einloggen.",
+        synopsis: ["usermod [OPTIONEN] BENUTZER"],
+        description: ["Ändert die Einstellungen eines vorhandenen Benutzerkontos."],
+        options: [
+            ["-a, --append", "BENUTZER zu den mit -G genannten weiteren Gruppen hinzufügen (nur zusammen mit -G)"],
+            ["-G, --groups GRUPPEN", "Liste der weiteren Gruppen, durch Komma getrennt"],
+            ["", "Ohne -a ersetzt -G alle bisherigen weiteren Gruppen!"],
         ],
-        examples: ["sudo usermod -aG team clara"],
+        examples: ["sudo usermod -aG labor clara"],
     },
     whoami: {
         summary: "Eigenen Benutzernamen anzeigen",
-        synopsis: "whoami",
+        synopsis: ["whoami"],
         description: ["Gibt den Namen des aktuellen Benutzers aus."],
         examples: ["whoami"],
     },
 };
 
+function optionLines(options: [string, string][]): string[] {
+    const width = Math.max(...options.map(([flag]) => flag.length)) + 2;
+    return options.map(([flag, text]) => `  ${flag.padEnd(width)}${text}`);
+}
+
+/** Kurzhilfe im Stil von BEFEHL --help */
 export function helpLines(name: string): string[] {
     const help = HELP_TEXTS[name];
     if (!help) return [];
-    return [`Usage: ${help.synopsis}`, help.summary + ".", "", ...help.description];
+    const lines = help.synopsis.map((synopsis, index) => `${index === 0 ? "Aufruf: " : "   oder: "}${synopsis}`);
+    lines.push(...help.description);
+    lines.push("", ...optionLines([...(help.options ?? []), ["    --help", "diese Hilfe anzeigen und beenden"]]));
+    if (help.notes) lines.push("", ...help.notes);
+    lines.push("", "Beispiele:", ...help.examples.map((example) => `  ${example}`));
+    return lines;
 }
 
+/** Ausführliche Handbuchseite im Stil von man BEFEHL */
 export function manLines(name: string): string[] {
     const help = HELP_TEXTS[name];
     if (!help) return [];
     const title = `${name.toUpperCase()}(1)`;
-    const indent = (text: string) => "       " + text;
-    return [
+    const indent = (text: string) => (text ? "       " + text : "");
+    const bold = (text: string) => `\x1b[1m${text}\x1b[0m`;
+    const lines = [
         `${title.padEnd(30)}Handbuch (Simulation)${title.padStart(30)}`,
         "",
-        "\x1b[1mNAME\x1b[0m",
+        bold("BEZEICHNUNG"),
         indent(`${name} - ${help.summary}`),
         "",
-        "\x1b[1mSYNOPSIS\x1b[0m",
-        indent(help.synopsis),
+        bold("ÜBERSICHT"),
+        ...help.synopsis.map(indent),
         "",
-        "\x1b[1mBESCHREIBUNG\x1b[0m",
+        bold("BESCHREIBUNG"),
         ...help.description.map(indent),
-        "",
-        "\x1b[1mBEISPIELE\x1b[0m",
-        ...help.examples.map(indent),
     ];
+    if (help.options) {
+        lines.push("", bold("OPTIONEN"));
+        for (const [flag, text] of help.options) {
+            if (flag) lines.push(indent(bold(flag)));
+            lines.push(indent("       " + text));
+        }
+    }
+    if (help.notes) lines.push("", bold("HINWEISE"), ...help.notes.map(indent));
+    lines.push("", bold("BEISPIELE"), ...help.examples.map(indent));
+    return lines;
 }

@@ -84,6 +84,21 @@ export function tokenize(line: string, state: ShellStateModel): string[] {
     return tokens;
 }
 
+/** Lange Optionen, die auf eine kurze abgebildet werden (z. B. ls --all = ls -a) */
+const LONG_TO_SHORT: Record<string, string> = {
+    all: "a",
+    directory: "d",
+    recursive: "R",
+    parents: "p",
+    force: "f",
+    interactive: "i",
+    verbose: "v",
+    user: "u",
+    group: "g",
+    groups: "G",
+    name: "n",
+};
+
 /** Trennt Optionen von Operanden. Nach "--" zählt alles als Operand. */
 export function splitFlags(args: string[]): ParsedArgs {
     const flags = new Set<string>();
@@ -97,7 +112,9 @@ export function splitFlags(args: string[]): ParsedArgs {
         } else if (arg === "--") {
             onlyOperands = true;
         } else if (arg.startsWith("--")) {
-            longFlags.add(arg.slice(2));
+            const long = arg.slice(2);
+            longFlags.add(long);
+            if (LONG_TO_SHORT[long]) flags.add(LONG_TO_SHORT[long]);
         } else {
             for (const flag of arg.slice(1)) flags.add(flag);
         }

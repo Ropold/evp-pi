@@ -12,7 +12,7 @@
       "type": "terminal",
       "scenario": "uebung3",
       "user": "mkeller",
-      "text": "Richte die Gruppe `tools` mit der GID `2011` ein und nimm `bwagner` als Mitglied auf (siehe `/etc/group`-Auszug).\n\nTipp (aus der man-Page): `--gid GID` – When creating a group, this option sets the group ID number of the new group to GID. When creating a user, this option sets the primary group ID number of the new user to GID. (GID = numerische Gruppen-ID, z. B. 2011 – kein Gruppenname.)",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nRichte die Gruppe `tools` mit der GID `2011` ein und nimm `bwagner` als Mitglied auf (siehe `/etc/group`-Auszug oben).\n\nTipp (aus der man-Page): `--gid GID` – When creating a group, this option sets the group ID number of the new group to GID. When creating a user, this option sets the primary group ID number of the new user to GID. (GID = numerische Gruppen-ID, z. B. 2011 – kein Gruppenname.)",
       "hints": [
         "Zwei Schritte: Gruppe mit fester GID anlegen, dann bwagner hinzufügen.",
         "`sudo addgroup --gid 2011 tools` und `sudo adduser bwagner tools`"
@@ -51,7 +51,7 @@
         "addgroup --gid 2011 tools",
         "adduser bwagner tools"
       ],
-      "text": "Heiko Klaus (`hklaus`) wird neu eingestellt. Lege für ihn einen Benutzeraccount an (siehe `/etc/group`-Auszug – achte auf **alle** Zeilen, in denen hklaus vorkommt).",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nHeiko Klaus (`hklaus`) wird neu eingestellt. Lege für ihn einen Benutzeraccount an (siehe `/etc/group`-Auszug oben – achte auf **alle** Zeilen, in denen hklaus vorkommt).",
       "hints": [
         "Benutzer anlegen – und in /etc/group nachsehen, wo hklaus noch steht.",
         "`sudo adduser hklaus` und `sudo adduser hklaus sudo`"
@@ -81,7 +81,7 @@
         "adduser hklaus",
         "adduser hklaus sudo"
       ],
-      "text": "`hklaus` legt anschließend das Verzeichnis `/srv/projekte` an und versieht es mit den im Diagramm abgebildeten Zugriffsrechten (Besitzer `root:technik`, Rechte `rwxr-Sr--`).",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\n`hklaus` legt anschließend das Verzeichnis `/srv/projekte` an und versieht es mit den im Diagramm abgebildeten Zugriffsrechten (Besitzer `root:technik`, Rechte `rwxr-Sr--`).",
       "hints": [
         "Drei Schritte: anlegen, Besitzer/Gruppe, Rechte. /srv gehört root → sudo.",
         "`r-S` = SGID ohne Gruppen-x: SGID (2) vorne, Gruppe nur r (4) → `chmod 2744`."
@@ -130,7 +130,7 @@
       "title": "Aufgabe 1",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd srv\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd srv\n```",
       "hints": [
         "Ist `srv` ein absoluter oder relativer Pfad?",
         "Gibt es in /home ein Verzeichnis `srv`?"
@@ -163,7 +163,7 @@
       "title": "Aufgabe 2",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd bwagner\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/home $ cd bwagner\n```",
       "hints": [
         "Welche Klasse gilt für mkeller bei /home/bwagner?",
         "/home/bwagner hat `rwxr-xr-x` – reicht das x für others?"
@@ -196,7 +196,7 @@
       "title": "Aufgabe 3",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ cd /srv/projekte\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ cd /srv/projekte\n```",
       "hints": [
         "Prüfe den ganzen Pfad: / → /srv → /srv/projekte.",
         "Welche Rechte hat die Gruppe technik auf /srv?"
@@ -229,7 +229,7 @@
       "title": "Begründung zu Aufgabe 3 (3 Punkte)",
       "category": "access",
       "type": "question",
-      "text": "Begründe deine Antwort zu Aufgabe 3 (`bwagner@lightning:/ $ cd /srv/projekte`).",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nBegründe deine Antwort zu Aufgabe 3 (`bwagner@lightning:/ $ cd /srv/projekte`).",
       "hints": [
         "An welcher Stelle im Pfad scheitert es zuerst?",
         "/srv: Gruppe technik nur `r--`."
@@ -259,7 +259,7 @@
       "title": "Aufgabe 4",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/home/mkeller $ cd ../../srv/tools\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/home/mkeller $ cd ../../srv/tools\n```",
       "hints": [
         "Wohin führt `../../srv/tools` von /home/mkeller aus?",
         "Der Weg geht über /srv – hat bwagner dort x?"
@@ -292,7 +292,7 @@
       "title": "Aufgabe 5a",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls /srv\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls /srv\n```",
       "hints": [
         "Was braucht man, um nur die Namen aufzulisten?",
         "r auf dem Verzeichnis genügt."
@@ -325,7 +325,7 @@
       "title": "Aufgabe 5b",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls -l /srv\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ ls -l /srv\n```",
       "hints": [
         "`ls -l` zeigt zusätzlich Rechte, Besitzer, Größe …",
         "Dafür braucht man x auf dem Verzeichnis."
@@ -358,7 +358,7 @@
       "title": "Begründung zu Aufgabe 5b (3 Punkte)",
       "category": "access",
       "type": "question",
-      "text": "Begründe deine Antwort zu Aufgabe 5b (`ls -l /srv` als bwagner) – im Unterschied zu 5a (`ls /srv`).",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nBegründe deine Antwort zu Aufgabe 5b (`ls -l /srv` als bwagner) – im Unterschied zu 5a (`ls /srv`).",
       "hints": [
         "Unterschied zwischen Namen lesen und Attribute lesen.",
         "r = Namen, x = Zugriff auf die Einträge."
@@ -388,7 +388,7 @@
       "title": "Aufgabe 6",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/srv/projekte $ touch neu.txt\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/srv/projekte $ touch neu.txt\n```",
       "hints": [
         "Anlegen braucht w+x im Ordner und x auf dem Weg.",
         "/srv: technik `r--`, /srv/projekte: technik `r-S`."
@@ -421,7 +421,7 @@
       "title": "Aufgabe 7",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/srv/projekte $ sudo touch neu.txt\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/srv/projekte $ sudo touch neu.txt\n```",
       "hints": [
         "Ist mkeller in der Gruppe sudo?",
         "Mit sudo läuft der Befehl als root."
@@ -454,7 +454,7 @@
       "title": "Aufgabe 8",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/srv $ cd ~\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: mkeller)\n```\nmkeller@lightning:/srv $ cd ~\n```",
       "hints": [
         "Wohin führt `cd ~`?",
         "Es zählt der Pfad zu /home/mkeller, nicht wo man gerade steht."
@@ -487,7 +487,7 @@
       "title": "Aufgabe 9",
       "category": "access",
       "type": "question",
-      "text": "Funktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ sudo cd /srv/projekte\n```",
+      "text": "**Szenario – /etc/group (relevante Zeilen):**\n```\nsudo:x:27:zturner,hklaus,fweber,mkeller\ntechnik:x:2010:mkeller,bwagner\ntools:x:2011:bwagner\nbwagner:x:2002:\nmkeller:x:2001:\n```\n**Verzeichnisbaum (Rechner lightning):**\n```\n/\n├── home         root:technik      rwx r-x r-x\n│   ├── mkeller  mkeller:mkeller   rwx r-x r-x\n│   └── bwagner  bwagner:bwagner   rwx r-x r-x\n└── srv          root:technik      rwx r-- r--\n    ├── projekte root:technik      rwx r-S r--\n    └── tools    root:tools        rwx r-x r-x\n```\nFunktioniert der Befehl? Antworten Sie mit **Ja** oder **Nein**. (Rolle: bwagner)\n```\nbwagner@lightning:/ $ sudo cd /srv/projekte\n```",
       "hints": [
         "Ist bwagner in der Gruppe sudo?",
         "Und: Ist `cd` ein eigenes Programm oder in die Shell eingebaut?"

@@ -83,7 +83,7 @@
       "type": "terminal",
       "scenario": "uebung2",
       "user": "tim",
-      "text": "Melden Sie sich als `tim` per Secure Shell auf `srv01` an – **mit dem Rechnernamen**.",
+      "text": "Ausgabe von Aufgabe 1a:\n```\nC:\\Users\\praktikant> ping srv01\n\nPing wird ausgeführt für srv01.netzwerk.lan [192.168.10.5] mit 32 Bytes Daten:\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\n\nPing-Statistik für 192.168.10.5:\n    Pakete: Gesendet = 4, Empfangen = 4, Verloren = 0 (0% Verlust)\n```\nMelden Sie sich als `tim` per Secure Shell auf `srv01` an – **mit dem Rechnernamen**.",
       "hints": [
         "Secure Shell = `ssh`.",
         "Schreibweise: `ssh benutzer@rechner`"
@@ -104,7 +104,7 @@
       "type": "terminal",
       "scenario": "uebung2",
       "user": "tim",
-      "text": "Melden Sie sich als `tim` per Secure Shell auf `srv01` an – diesmal **mit der IP-Adresse**.",
+      "text": "Ausgabe von Aufgabe 1a:\n```\nC:\\Users\\praktikant> ping srv01\n\nPing wird ausgeführt für srv01.netzwerk.lan [192.168.10.5] mit 32 Bytes Daten:\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\nAntwort von 192.168.10.5: Bytes=32 Zeit<1ms TTL=64\n\nPing-Statistik für 192.168.10.5:\n    Pakete: Gesendet = 4, Empfangen = 4, Verloren = 0 (0% Verlust)\n```\nMelden Sie sich als `tim` per Secure Shell auf `srv01` an – diesmal **mit der IP-Adresse**.",
       "hints": [
         "Wie bei 1b, nur mit der IP statt dem Namen.",
         "IP von srv01: 192.168.10.5"
@@ -323,7 +323,7 @@
       "title": "Teil 2 · Aufgabe 2d",
       "category": "users",
       "type": "question",
-      "text": "Erklären Sie den Unterschied zwischen Primärgruppe und weiteren Gruppen. Welche Gruppe erhält eine neu angelegte Datei normalerweise?",
+      "text": "```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```\nErklären Sie den Unterschied zwischen Primärgruppe und weiteren Gruppen. Welche Gruppe erhält eine neu angelegte Datei normalerweise?",
       "hints": [
         "Welche Gruppe bekommt eine Datei, die du mit `touch` anlegst?",
         "Die Primärgruppe (gid) – weitere Gruppen geben nur zusätzliche Rechte."
@@ -394,7 +394,7 @@
       "type": "terminal",
       "scenario": "uebung2",
       "user": "tim",
-      "text": "Damit Sie als Praktikant mit den Projektdaten arbeiten können, soll `tim` Mitglied der Gruppe `projekt` werden. Erledigen Sie das **mit adduser**.",
+      "text": "Damit Sie als Praktikant mit den Projektdaten arbeiten können, soll `tim` Mitglied der Gruppe `projekt` werden. Erledigen Sie das **mit adduser**.\nIhre Ausgangslage:\n```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```",
       "hints": [
         "Gruppen ändern darf nur root.",
         "`sudo adduser BENUTZER GRUPPE`"
@@ -423,7 +423,7 @@
       "title": "Teil 2 · Aufgabe 3b",
       "category": "users",
       "type": "question",
-      "text": "Damit Sie mit den Projektdaten arbeiten können, wird `tim` mit `sudo adduser tim projekt` Mitglied der Gruppe `projekt`.\nWarum ist hier `sudo` nötig?",
+      "text": "Damit Sie mit den Projektdaten arbeiten können, wird `tim` mit `sudo adduser tim projekt` Mitglied der Gruppe `projekt`.\nWarum ist hier `sudo` nötig?\nAusgangslage vorher:\n```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```",
       "hints": [
         "Wo stehen die Gruppenmitgliedschaften?",
         "`/etc/group` darf nur root ändern."
@@ -443,7 +443,7 @@
       "title": "Teil 2 · Aufgabe 3c",
       "category": "users",
       "type": "question",
-      "text": "Direkt nach `sudo adduser tim projekt` geben Sie in derselben Sitzung `id` ein. Die Gruppe `projekt` steht noch nicht in der Liste. Erklären Sie, warum, und sagen Sie, was Sie tun müssen.",
+      "text": "Direkt nach `sudo adduser tim projekt` geben Sie in derselben Sitzung `id` ein. Die Gruppe `projekt` steht noch nicht in der Liste. Erklären Sie, warum, und sagen Sie, was Sie tun müssen.\nAusgabe vor der Änderung:\n```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```",
       "hints": [
         "Wann liest eine Sitzung ihre Gruppen ein?",
         "Gruppen werden beim Anmelden festgelegt."
@@ -463,7 +463,7 @@
       "title": "Teil 2 · Aufgabe 3d",
       "category": "users",
       "type": "question",
-      "text": "tim wurde mit `sudo adduser tim projekt` in die Gruppe `projekt` (GID 1010) aufgenommen und hat sich neu angemeldet. Woran erkennen Sie, dass die Änderung wirksam ist? Welche Ausgabe von `id` erwarten Sie?",
+      "text": "tim wurde mit `sudo adduser tim projekt` in die Gruppe `projekt` (GID 1010) aufgenommen und hat sich neu angemeldet. Woran erkennen Sie, dass die Änderung wirksam ist? Welche Ausgabe von `id` erwarten Sie?\nAusgabe vor der Änderung:\n```\ntim@srv01:~$ id\nuid=1004(tim) gid=1004(tim) Gruppen=1004(tim),27(sudo)\n\ntim@srv01:~$ id carla\nuid=1003(carla) gid=1003(carla) Gruppen=1003(carla),1011(extern)\n```",
       "hints": [
         "Was ändert sich: Primärgruppe oder weitere Gruppen?",
         "projekt kommt als weitere Gruppe dazu, die gid bleibt tim."
@@ -488,7 +488,7 @@
       "setup": [
         "adduser tim projekt"
       ],
-      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden, damit er mit carla Dateien austauschen kann. Verwenden Sie dieses Mal **usermod**.",
+      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden, damit er mit carla Dateien austauschen kann. Verwenden Sie dieses Mal **usermod**.\nAusgangslage:\n```\ntim@srv01:~$ id ben\nuid=1002(ben) gid=1002(ben) Gruppen=1002(ben),1010(projekt)\n```",
       "hints": [
         "usermod braucht zwei Optionen, um eine Gruppe **anzuhängen**.",
         "`sudo usermod -aG GRUPPE BENUTZER`"
@@ -522,7 +522,7 @@
       "title": "Teil 2 · Aufgabe 4b",
       "category": "users",
       "type": "question",
-      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden: `sudo usermod -aG extern ben`.\nWofür steht die Option `-a`? Was würde ohne diese Option passieren?",
+      "text": "Ben soll zusätzlich Mitglied der Gruppe `extern` werden: `sudo usermod -aG extern ben`.\nWofür steht die Option `-a`? Was würde ohne diese Option passieren?\nAusgangslage vorher:\n```\ntim@srv01:~$ id ben\nuid=1002(ben) gid=1002(ben) Gruppen=1002(ben),1010(projekt)\n```",
       "hints": [
         "Wofür könnte „a“ auf Englisch stehen?",
         "Ohne `-a` ersetzt `-G` die komplette Liste der weiteren Gruppen."
@@ -803,7 +803,7 @@
       "title": "Teil 3 · Aufgabe 8",
       "category": "readPermissions",
       "type": "question",
-      "text": "Betrachten Sie `budget.txt` aus Aufgabe 5 (`-r--rw---- 1 anna projekt`). Berücksichtigen Sie nur die Rechte der Datei selbst, nicht den Weg dorthin.\nWelche Rechtegruppe gilt jeweils für **anna, ben, carla, tim**? (Antwort z. B. `Besitzer, Gruppe, others, Gruppe`)",
+      "text": "Betrachten Sie `budget.txt` aus Aufgabe 5 (`-r--rw---- 1 anna projekt`). Berücksichtigen Sie nur die Rechte der Datei selbst, nicht den Weg dorthin.\nWelche Rechtegruppe gilt jeweils für **anna, ben, carla, tim**? (Antwort z. B. `Besitzer, Gruppe, others, Gruppe`)\nGruppenmitgliedschaften:\n```\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt\ncarla     carla, extern\ntim       tim, sudo, projekt   (seit Aufgabe 3)\n```",
       "hints": [
         "Prüfreihenfolge: Besitzer → Gruppe → others, der erste Treffer gilt.",
         "tim ist seit Aufgabe 3 in projekt (im Terminal: `id tim`)."
@@ -833,7 +833,7 @@
       "title": "Teil 3 · Aufgabe 8",
       "category": "readPermissions",
       "type": "question",
-      "text": "Datei `budget.txt`: `-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`. tim ist seit Aufgabe 3 in `projekt`, ben in `ben, projekt`, carla in `carla, extern`.\nWer von anna, ben, carla und tim darf die Datei **ändern**? (Namen mit Komma getrennt)",
+      "text": "Datei `budget.txt`: `-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`. tim ist seit Aufgabe 3 in `projekt`, ben in `ben, projekt`, carla in `carla, extern`.\nWer von anna, ben, carla und tim darf die Datei **ändern**? (Namen mit Komma getrennt)\nGruppenmitgliedschaften:\n```\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt\ncarla     carla, extern\ntim       tim, sudo, projekt   (seit Aufgabe 3)\n```",
       "hints": [
         "Bestimme zuerst die Klasse jeder Person.",
         "Besitzer `r--`, Gruppe `rw-`, others `---`."
@@ -863,7 +863,7 @@
       "title": "Teil 3 · Aufgabe 8",
       "category": "readPermissions",
       "type": "question",
-      "text": "`-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`\nAnna ist ebenfalls Mitglied der Gruppe `projekt`. Warum gelten für sie trotzdem nicht die Rechte `rw-`?",
+      "text": "`-r--rw---- 1 anna projekt 1520 Nov  4 14:20 budget.txt`\nAnna ist ebenfalls Mitglied der Gruppe `projekt`. Warum gelten für sie trotzdem nicht die Rechte `rw-`?\nGruppenmitgliedschaften:\n```\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt\ncarla     carla, extern\ntim       tim, sudo, projekt   (seit Aufgabe 3)\n```",
       "hints": [
         "Werden die Rechte von Besitzer und Gruppe zusammengezählt?",
         "Nur die erste passende Klasse gilt."
@@ -1443,7 +1443,7 @@
         "adduser tim projekt",
         "usermod -aG extern ben"
       ],
-      "text": "Verschieben Sie `notiz.txt` (im Home-Verzeichnis) in das Verzeichnis `/srv/projekt/code`.",
+      "text": "Im Home-Verzeichnis von `tim` (`tim@srv01:~$`) liegen die Dateien `bericht.txt` und `notiz.txt`.\nVerschieben Sie `notiz.txt` (im Home-Verzeichnis) in das Verzeichnis `/srv/projekt/code`.",
       "hints": [
         "Verschieben = `mv QUELLE ZIEL`.",
         "`mv notiz.txt /srv/projekt/code/`"
@@ -1482,7 +1482,7 @@
         "adduser tim projekt",
         "usermod -aG extern ben"
       ],
-      "text": "Erreichen Sie dasselbe Ergebnis wie in 13b (notiz.txt landet in `/srv/projekt/code` und ist aus dem Home verschwunden) – diesmal mit den beiden Befehlen **cp** und **rm**.",
+      "text": "Im Home-Verzeichnis von `tim` (`tim@srv01:~$`) liegt die Datei `notiz.txt`.\nErreichen Sie dasselbe Ergebnis wie in 13b (notiz.txt landet in `/srv/projekt/code` und ist aus dem Home verschwunden) – diesmal mit den beiden Befehlen **cp** und **rm**.",
       "hints": [
         "Erst kopieren, dann das Original löschen.",
         "`cp notiz.txt /srv/projekt/code/` und danach `rm notiz.txt`"
@@ -1594,7 +1594,7 @@
         "chown tim:tim /home/tim/ideen.txt",
         "chmod 640 /home/tim/ideen.txt"
       ],
-      "text": "`ideen.txt` soll für Besitzer und Gruppe les- und schreibbar sein, für others gesperrt. Verwenden Sie `chmod` mit **oktalen** Rechten.",
+      "text": "Sie arbeiten im Home-Verzeichnis (`tim@srv01:~$`). Dort liegt die Datei `ideen.txt` (gehört `tim`).\n`ideen.txt` soll für Besitzer und Gruppe les- und schreibbar sein, für others gesperrt. Verwenden Sie `chmod` mit **oktalen** Rechten.",
       "hints": [
         "Besitzer und Gruppe rw-, others ---.",
         "rw- = 6."
@@ -1692,7 +1692,7 @@
         "adduser tim projekt",
         "usermod -aG extern ben"
       ],
-      "text": "Bei `weitergabe.txt` (`-rw-r--r--`) sollen für others **alle** Rechte entfernt werden (symbolisch).",
+      "text": "Sie arbeiten im Home-Verzeichnis (`tim@srv01:~$`). Verwenden Sie die symbolische Schreibweise.\nBei `weitergabe.txt` (`-rw-r--r--`) sollen für others **alle** Rechte entfernt werden (symbolisch).",
       "hints": [
         "others = `o`, entfernen = `-`.",
         "Alle drei Rechte: `rwx`."
@@ -1727,7 +1727,7 @@
         "adduser tim projekt",
         "usermod -aG extern ben"
       ],
-      "text": "Für `material` (`drwxr-xr-x`) sollen mit einem **einzigen** Befehl die Rechte genau auf `rwx` für den Besitzer und keine Rechte für Gruppe und others gesetzt werden (symbolisch).",
+      "text": "Sie arbeiten im Home-Verzeichnis (`tim@srv01:~$`). Verwenden Sie die symbolische Schreibweise.\nFür `material` (`drwxr-xr-x`) sollen mit einem **einzigen** Befehl die Rechte genau auf `rwx` für den Besitzer und keine Rechte für Gruppe und others gesetzt werden (symbolisch).",
       "hints": [
         "`=` setzt die Rechte einer Klasse genau.",
         "Mehrere Klassen mit Komma trennen: `u=…,g=,o=`"
@@ -1805,7 +1805,7 @@
         "chown anna:anna /srv/projekt/doku/angebot.txt",
         "chmod 660 /srv/projekt/doku/angebot.txt"
       ],
-      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/doku/angebot.txt\n-rw-rw---- 1 anna anna 1500 Nov 10 08:35 /srv/projekt/doku/angebot.txt\n```\nZiel: Alle Mitglieder von `projekt` sollen die Datei ändern dürfen. Ändern Sie nur, was nötig ist.",
+      "text": "Entscheiden Sie, was geändert werden muss (Besitzer, Gruppe oder Rechte), und führen Sie den passenden Befehl aus – `sudo` nur, wenn nötig.\n```\ntim@srv01:~$ ls -l /srv/projekt/doku/angebot.txt\n-rw-rw---- 1 anna anna 1500 Nov 10 08:35 /srv/projekt/doku/angebot.txt\n```\nZiel: Alle Mitglieder von `projekt` sollen die Datei ändern dürfen. Ändern Sie nur, was nötig ist.",
       "hints": [
         "Die Rechte `rw-rw----` passen schon – was stimmt nicht?",
         "Die Gruppe ist falsch, und tim ist nicht Besitzer → `sudo chgrp …`"
@@ -1845,7 +1845,7 @@
         "chown tim:projekt /srv/projekt/code/export.csv",
         "chmod 660 /srv/projekt/code/export.csv"
       ],
-      "text": "```\ntim@srv01:~$ ls -l /srv/projekt/code/export.csv\n-rw-rw---- 1 tim projekt 3200 Nov 10 08:40 /srv/projekt/code/export.csv\n```\nZiel: Die Datei soll `anna` gehören.",
+      "text": "Entscheiden Sie, was geändert werden muss (Besitzer, Gruppe oder Rechte), und führen Sie den passenden Befehl aus – `sudo` nur, wenn nötig.\n```\ntim@srv01:~$ ls -l /srv/projekt/code/export.csv\n-rw-rw---- 1 tim projekt 3200 Nov 10 08:40 /srv/projekt/code/export.csv\n```\nZiel: Die Datei soll `anna` gehören.",
       "hints": [
         "Was soll sich ändern: Rechte, Gruppe oder Besitzer?",
         "Besitzer ändern darf nur root → `sudo chown …`"
@@ -1952,7 +1952,7 @@
         "chown tim:tim /srv/projekt/doku/protokoll.txt",
         "chmod 640 /srv/projekt/doku/protokoll.txt"
       ],
-      "text": "Lösen Sie das Problem aus 17a, ohne unnötige Rechte zu vergeben (Prompt `tim@srv01:~$`, **absoluter Pfad**). Verwenden Sie `chgrp`.",
+      "text": "Sie haben `bericht.txt` als `protokoll.txt` nach `/srv/projekt/doku` kopiert. Ben meldet ein Problem.\n```\nben@srv01:~$ cat /srv/projekt/doku/protokoll.txt\ncat: /srv/projekt/doku/protokoll.txt: Keine Berechtigung\n\ntim@srv01:~$ ls -l /srv/projekt/doku/protokoll.txt\n-rw-r----- 1 tim tim 733 Nov 10 09:05 /srv/projekt/doku/protokoll.txt\n```\nben ist Mitglied von `ben, projekt`.\nLösen Sie das Problem aus 17a, ohne unnötige Rechte zu vergeben (Prompt `tim@srv01:~$`, **absoluter Pfad**). Verwenden Sie `chgrp`.",
       "hints": [
         "Nicht die Rechte, sondern die Gruppe ist das Problem.",
         "`chgrp projekt /srv/projekt/doku/protokoll.txt` (tim ist Besitzer und in projekt)."
@@ -1996,7 +1996,7 @@
         "chown tim:tim /srv/projekt/doku/protokoll.txt",
         "chmod 640 /srv/projekt/doku/protokoll.txt"
       ],
-      "text": "Lösen Sie dasselbe Problem mit einem gleichwertigen Befehl eines **anderen Programms** (absoluter Pfad).",
+      "text": "Sie haben `bericht.txt` als `protokoll.txt` nach `/srv/projekt/doku` kopiert. Ben meldet ein Problem.\n```\nben@srv01:~$ cat /srv/projekt/doku/protokoll.txt\ncat: /srv/projekt/doku/protokoll.txt: Keine Berechtigung\n\ntim@srv01:~$ ls -l /srv/projekt/doku/protokoll.txt\n-rw-r----- 1 tim tim 733 Nov 10 09:05 /srv/projekt/doku/protokoll.txt\n```\nben ist Mitglied von `ben, projekt`.\nLösen Sie dasselbe Problem mit einem gleichwertigen Befehl eines **anderen Programms** (absoluter Pfad).",
       "hints": [
         "chown kann auch nur die Gruppe ändern.",
         "`chown :GRUPPE DATEI`"
@@ -2187,7 +2187,7 @@
         "adduser tim projekt",
         "usermod -aG extern ben"
       ],
-      "text": "Nehmen Sie als `tim` die Einstellung aus 19b vor (absoluter Pfad).",
+      "text": "**Ausgangslage Teil 6:**\n```\ntim@srv01:~$ ls -ld /srv/projekt/doku\ndrwxrwx--- 3 anna projekt 4096 Nov  2 16:48 /srv/projekt/doku\n```\nAlle Dateien und Ordner, die in `/srv/projekt/doku` angelegt werden, sollen künftig automatisch der Gruppe `projekt` gehören, egal wer sie anlegt.\nNehmen Sie als `tim` die Einstellung aus 19b vor (absoluter Pfad).",
       "hints": [
         "Symbolisch: Gruppe + s.",
         "doku gehört anna → tim braucht sudo: `sudo chmod g+s /srv/projekt/doku`"
@@ -2441,7 +2441,7 @@
         "usermod -aG extern ben",
         "chmod g+s /srv/projekt/doku"
       ],
-      "text": "Geben Sie `konzept.txt` (`/srv/projekt/doku/konzept.txt`, gehört anna:anna) nachträglich die Gruppe `projekt`. Sie arbeiten als `tim`.",
+      "text": "`/srv/projekt/doku` hat `drwxrws--- anna projekt` (SGID gesetzt).\n```\ntim@srv01:~$ ls -l /srv/projekt/doku/konzept.txt\n-rw-r--r-- 1 anna anna 2048 Nov  3 10:15 /srv/projekt/doku/konzept.txt\n```\nGeben Sie `konzept.txt` (`/srv/projekt/doku/konzept.txt`, gehört anna:anna) nachträglich die Gruppe `projekt`. Sie arbeiten als `tim`.",
       "hints": [
         "Nur die Gruppe soll sich ändern.",
         "konzept.txt gehört anna → `sudo chgrp projekt /srv/projekt/doku/konzept.txt`"
@@ -2849,7 +2849,7 @@
         "chmod g+s /srv/projekt/doku",
         "chgrp projekt /srv/projekt/doku/konzept.txt"
       ],
-      "text": "Die Projektleitung erlaubt ausdrücklich, dass **alle** Benutzer `/srv/projekt` **durchqueren**, aber **nicht auflisten** dürfen. Führen Sie den Befehl als `tim` aus.",
+      "text": "**Für Teil 7 gilt dieser Zustand (Ergebnis der Teile 2 bis 6):**\n```\nPfad                            Besitzer : Gruppe   Rechte\n/srv/projekt                    root : projekt      drwxr-x---  (750)\n/srv/projekt/doku               anna : projekt      drwxrws---  (2770)\n/srv/projekt/doku/konzept.txt   anna : projekt      -rw-r--r--  (644)\n/srv/projekt/code               ben  : projekt      drwxrwx---  (770)\n/srv/projekt/code/build         ben  : projekt      drwxr-xr-x  (755)\n/srv/projekt/austausch          anna : extern       drwxrwx---  (770)\n\nBenutzer  Gruppen\nanna      anna, projekt\nben       ben, projekt, extern\ncarla     carla, extern\ntim       tim, sudo, projekt\n```\nDie Projektleitung erlaubt ausdrücklich, dass **alle** Benutzer `/srv/projekt` **durchqueren**, aber **nicht auflisten** dürfen. Führen Sie den Befehl als `tim` aus.",
       "hints": [
         "Durchqueren = x, auflisten = r. Für alle = others.",
         "/srv/projekt gehört root → `sudo chmod o+x /srv/projekt`"
