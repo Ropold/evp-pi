@@ -11,22 +11,16 @@
       "category": "login",
       "type": "question",
       "text": "```\nkim@web01:~$ ping -c 2 nas01\nPING nas01 (192.168.20.30) 56(84) bytes of data.\nFrom 192.168.20.10 icmp_seq=1 Destination Host Unreachable\nFrom 192.168.20.10 icmp_seq=2 Destination Host Unreachable\n\n--- nas01 ping statistics ---\n2 packets transmitted, 0 received, 100% packet loss, time 1001ms\n```\nWas sagt die Ausgabe über `nas01`?",
-      "choices": [
-        "Der Name wurde aufgelöst (192.168.20.30), aber der Rechner antwortet nicht.",
-        "Der Name ist unbekannt, deshalb wurde nichts gesendet.",
-        "nas01 ist erreichbar, nur langsam.",
-        "web01 selbst hat keine Netzwerkverbindung."
+      "hints": [
+        "Steht hinter `nas01` schon eine IP-Adresse? Dann hat die Namensauflösung geklappt.",
+        "`Destination Host Unreachable` + 100 % packet loss = keine Antwort vom Zielrechner."
       ],
-      "hints": [],
       "solutions": [
         "Der Name wurde aufgelöst (192.168.20.30), aber der Rechner antwortet nicht."
       ],
       "explanation": "Hinter dem Namen steht schon die IP → Namensauflösung klappt. `Destination Host Unreachable` und 100 % Verlust → keine Antwort (z. B. ausgeschaltet).",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Der Name wurde aufgelöst (192.168.20.30), aber der Rechner antwortet nicht."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -37,22 +31,16 @@
       "category": "login",
       "type": "question",
       "text": "```\nkim@web01:~$ ping fileserver\nping: fileserver: Name or service not known\n```\nWas ist hier das Problem?",
-      "choices": [
-        "Der Name fileserver kann nicht aufgelöst werden – es wurde gar kein Paket gesendet.",
-        "fileserver ist ausgeschaltet.",
-        "kim hat keine Rechte, ping zu benutzen.",
-        "fileserver antwortet, aber mit Fehlern."
+      "hints": [
+        "Wird überhaupt eine IP-Adresse angezeigt?",
+        "`Name or service not known` kommt, bevor ein Paket gesendet wird."
       ],
-      "hints": [],
       "solutions": [
         "Der Name fileserver kann nicht aufgelöst werden – es wurde gar kein Paket gesendet."
       ],
       "explanation": "Ohne IP-Adresse kann ping nichts senden. Abhilfe: Namen prüfen oder direkt die IP verwenden.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Der Name fileserver kann nicht aufgelöst werden – es wurde gar kein Paket gesendet."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -65,7 +53,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "Prüfen Sie, ob `web01` erreichbar ist – mit **genau 4** Paketen, damit Sie nicht mit Strg+C abbrechen müssen.",
-      "hints": [],
+      "hints": [
+        "Die Option heißt „count“.",
+        "`ping -c ANZAHL rechner`"
+      ],
       "solutions": [
         "ping -c 4 web01"
       ],
@@ -83,7 +74,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "Melden Sie sich per SSH als Benutzer `lena` auf `web01` an – über die **IP-Adresse**.",
-      "hints": [],
+      "hints": [
+        "Schreibweise: `ssh benutzer@ziel` – als Ziel geht auch eine IP.",
+        "Die IP von web01 steht in der Ausgangslage: 192.168.20.10."
+      ],
       "solutions": [
         "ssh lena@192.168.20.10"
       ],
@@ -108,22 +102,16 @@
       "category": "login",
       "type": "question",
       "text": "Nach `sudo -i` zeigt das Terminal `root@web01:~#`. Was ist anders als bei `kim@web01:~$`?",
-      "choices": [
-        "Angemeldet ist jetzt root; ~ ist jetzt das Home von root (/root); # zeigt den Administrator an.",
-        "Nur das Zeichen # ist neu – es bedeutet, dass ein Kommentar folgt.",
-        "Man ist weiterhin kim, hat aber jetzt das Home /root.",
-        "~ steht weiterhin für /home/kim, # bedeutet „sicherer Modus“."
+      "hints": [
+        "Aufbau: `benutzer@rechner:verzeichnis` + Zeichen am Ende.",
+        "`~` ist immer das Home des **angemeldeten** Benutzers; `#` vs. `$`."
       ],
-      "hints": [],
       "solutions": [
         "Angemeldet ist jetzt root; ~ ist jetzt das Home von root (/root); # zeigt den Administrator an."
       ],
       "explanation": "`~` ist immer das Home des angemeldeten Benutzers. `$` = normaler Benutzer, `#` = root.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Angemeldet ist jetzt root; ~ ist jetzt das Home von root (/root); # zeigt den Administrator an."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -134,7 +122,10 @@
       "category": "login",
       "type": "question",
       "text": "```\nlena@web01:~$ ls -ld /var/www\ndrwxr-x--- 5 root web 4096 Nov  1 10:00 /var/www\n```\nWie viele Unterverzeichnisse hat `/var/www` laut dieser Ausgabe?",
-      "hints": [],
+      "hints": [
+        "Die Zahl nach den Rechten ist bei Verzeichnissen die Linkzahl.",
+        "Linkzahl = 2 + Anzahl der Unterverzeichnisse."
+      ],
       "solutions": [
         "3"
       ],
@@ -155,7 +146,10 @@
       "category": "users",
       "type": "question",
       "text": "```\nkim@web01:~$ id max\nuid=1003(max) gid=1003(max) groups=1003(max),1100(web)\n```\nWelche GID hat die Gruppe `web`?",
-      "hints": [],
+      "hints": [
+        "Gruppen stehen als `GID(Name)` in der Ausgabe.",
+        "Suche `(web)` – die Zahl davor."
+      ],
       "solutions": [
         "1100"
       ],
@@ -177,7 +171,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "Praktikant `jonas` soll am Shop mitarbeiten und deshalb Mitglied der Gruppe `web` werden. Seine bisherigen Gruppen müssen erhalten bleiben.",
-      "hints": [],
+      "hints": [
+        "Gruppen ändern darf nur root → `sudo`.",
+        "`sudo adduser BENUTZER GRUPPE` oder `sudo usermod -aG GRUPPE BENUTZER`"
+      ],
       "solutions": [
         "sudo adduser jonas web",
         "sudo usermod -aG web jonas"
@@ -195,22 +192,16 @@
       "category": "users",
       "type": "question",
       "text": "kim hat jonas mit `sudo adduser jonas web` in die Gruppe `web` aufgenommen. jonas war dabei schon angemeldet und tippt direkt danach in seiner offenen Sitzung `ls /var/www` (`drwxr-x--- root web`). Was passiert?",
-      "choices": [
-        "Permission denied – seine Sitzung kennt die Gruppe web noch nicht. Er muss sich ab- und wieder anmelden.",
-        "Es funktioniert sofort, weil /etc/group schon geändert ist.",
-        "Es funktioniert, aber nur mit sudo.",
-        "Fehler „No such file or directory“, weil /var/www für ihn unsichtbar ist."
+      "hints": [
+        "Wann werden die Gruppen einer Sitzung festgelegt?",
+        "Gruppen werden beim Anmelden gelesen – eine offene Sitzung kennt die neue Gruppe nicht."
       ],
-      "hints": [],
       "solutions": [
         "Permission denied – seine Sitzung kennt die Gruppe web noch nicht. Er muss sich ab- und wieder anmelden."
       ],
       "explanation": "Gruppen werden beim Anmelden gelesen. Bis dahin gilt für jonas bei /var/www others `---`.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Permission denied – seine Sitzung kennt die Gruppe web noch nicht. Er muss sich ab- und wieder anmelden."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -221,7 +212,10 @@
       "category": "users",
       "type": "question",
       "text": "kim tippt versehentlich `sudo usermod -G kunden lena`. In welchen Gruppen ist `lena` danach? (Primärgruppe zuerst, mit Komma getrennt)",
-      "hints": [],
+      "hints": [
+        "Was macht `-G` ohne `-a`?",
+        "Ohne `-a` wird die Liste der **weiteren** Gruppen ersetzt. Die Primärgruppe bleibt immer."
+      ],
       "solutions": [
         "lena, kunden"
       ],
@@ -243,7 +237,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "kim möchte etwas aus Sicht von `max` testen. Wechseln Sie als kim mit einem vollständigen Login zum Benutzer `max` (in der Simulation gibt es keine Passwörter – kim darf sudo).",
-      "hints": [],
+      "hints": [
+        "Benutzer wechseln mit vollständigem Login: `su - BENUTZER`.",
+        "Ohne Passwort geht es nur als root – also mit `sudo` davor."
+      ],
       "solutions": [
         "sudo su - max"
       ],
@@ -259,7 +256,10 @@
       "category": "readPermissions",
       "type": "question",
       "text": "`drwxrws--- 2 max web 4096 Nov  5 09:30 shop`\nWie lauten die Rechte von `shop` oktal (vierstellig)?",
-      "hints": [],
+      "hints": [
+        "r = 4, w = 2, x = 1. Ein `s` bei der Gruppe ist ein Spezialbit.",
+        "SGID steht als 2 vor den drei normalen Ziffern."
+      ],
       "solutions": [
         "2770"
       ],
@@ -279,22 +279,16 @@
       "category": "sgid",
       "type": "question",
       "text": "Ein Verzeichnis zeigt `drwxr-S---`. Was bedeutet das große `S`?",
-      "choices": [
-        "SGID ist gesetzt, aber die Gruppe hat kein x – Gruppenmitglieder können nicht hineinwechseln. Oktal 2740.",
-        "SGID ist gesetzt und die Gruppe hat x. Oktal 2750.",
-        "Das Sticky-Bit ist gesetzt. Oktal 1740.",
-        "Großes S bedeutet SUID für den Besitzer. Oktal 4740."
+      "hints": [
+        "Kleines s = Spezialbit **und** x. Was bedeutet dann das große S?",
+        "Großes S = SGID gesetzt, aber **ohne** x für die Gruppe."
       ],
-      "hints": [],
       "solutions": [
         "SGID ist gesetzt, aber die Gruppe hat kein x – Gruppenmitglieder können nicht hineinwechseln. Oktal 2740."
       ],
       "explanation": "Kleines s = Spezialbit + x, großes S = Spezialbit ohne x. Meist ein Fehler, denn ohne x nützt die Gruppenvererbung wenig.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "SGID ist gesetzt, aber die Gruppe hat kein x – Gruppenmitglieder können nicht hineinwechseln. Oktal 2740."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -305,7 +299,10 @@
       "category": "readPermissions",
       "type": "question",
       "text": "`drwxrwxrwt 9 root root 4096 Nov 10 07:00 /tmp`\nWie lauten die Rechte von `/tmp` oktal (vierstellig)?",
-      "hints": [],
+      "hints": [
+        "Das `t` am Ende ist das Sticky-Bit.",
+        "Sticky-Bit = 1 vor den drei normalen Ziffern."
+      ],
       "solutions": [
         "1777"
       ],
@@ -325,7 +322,10 @@
       "category": "readPermissions",
       "type": "question",
       "text": "`-rw-rw-r-- 1 lena web 1840 Nov  5 09:12 index.html`\nWelche Rechtegruppe gilt (nur Datei, ohne Pfad) für **lena, max, jonas** (Ausgangslage)?",
-      "hints": [],
+      "hints": [
+        "Linux prüft: Besitzer? sonst Gruppe? sonst others.",
+        "Wer ist in `web`? Siehe Benutzertabelle (oder `id jonas` im Terminal)."
+      ],
       "solutions": [
         "Besitzer, Gruppe, others"
       ],
@@ -347,7 +347,10 @@
       "category": "readPermissions",
       "type": "question",
       "text": "Rechnen Sie um: `2775` (Verzeichnis) symbolisch mit Typ, und `rwxr-x--x` oktal. (Antwort: symbolisch, oktal)",
-      "hints": [],
+      "hints": [
+        "2775: die 2 vorne ist SGID → `s` an der Gruppen-x-Stelle.",
+        "`rwxr-x--x`: jede Dreiergruppe einzeln zusammenzählen (r4 w2 x1)."
+      ],
       "solutions": [
         "drwxrwsr-x, 751"
       ],
@@ -370,7 +373,10 @@
       "scenario": "uebung1",
       "user": "lena",
       "text": "Legen Sie in Ihrem Home-Verzeichnis die Ordnerstruktur `projekte/2026/entwuerfe` mit **einem** Befehl an.",
-      "hints": [],
+      "hints": [
+        "mkdir legt normalerweise keine fehlenden Zwischenordner an.",
+        "Die Option heißt „parents“: `mkdir -p …`"
+      ],
       "solutions": [
         "mkdir -p projekte/2026/entwuerfe"
       ],
@@ -403,7 +409,10 @@
         "chown -R lena:lena /home/lena/projekte"
       ],
       "text": "Kopieren Sie den Ordner `projekte` (in Ihrem Home) **samt Inhalt** nach `/tmp`.",
-      "hints": [],
+      "hints": [
+        "Ordner kopiert cp nur mit einer Zusatzoption.",
+        "`cp -r QUELLE ZIEL`"
+      ],
       "solutions": [
         "cp -r projekte /tmp/"
       ],
@@ -427,7 +436,10 @@
         "chown -R lena:lena /home/lena/projekte"
       ],
       "text": "Löschen Sie den Ordner `projekte` in Ihrem Home **samt Inhalt**.",
-      "hints": [],
+      "hints": [
+        "Ordner mit Inhalt löscht rm nur rekursiv.",
+        "`rm -r ORDNER`"
+      ],
       "solutions": [
         "rm -r projekte"
       ],
@@ -449,7 +461,10 @@
         "chown lena:lena /home/lena/alt"
       ],
       "text": "In Ihrem Home liegt der **leere** Ordner `alt`. Löschen Sie ihn mit dem Befehl, der ausschließlich leere Ordner löscht.",
-      "hints": [],
+      "hints": [
+        "Es gibt einen eigenen Befehl nur für leere Ordner.",
+        "`rmdir ORDNER`"
+      ],
       "solutions": [
         "rmdir alt"
       ],
@@ -476,7 +491,10 @@
       "scenario": "uebung1",
       "user": "lena",
       "text": "Stellen Sie Ihre umask für diese Sitzung so ein, dass neue Dateien die Rechte `640` und neue Verzeichnisse `750` bekommen. Legen Sie danach in Ihrem Home die Datei `notiz.txt` an.",
-      "hints": [],
+      "hints": [
+        "Die umask gibt an, welche Rechte **entzogen** werden. Dateien starten mit 666, Ordner mit 777.",
+        "777 − 750 = 027 → `umask 027`, danach `touch notiz.txt`."
+      ],
       "solutions": [
         "umask 027",
         "touch notiz.txt"
@@ -500,7 +518,10 @@
       "category": "sgid",
       "type": "question",
       "text": "lena (umask 0002) legt in `/var/www/shop` (`drwxrws--- max web`) den Ordner `bilder` an. Besitzer, Gruppe, Rechte symbolisch?",
-      "hints": [],
+      "hints": [
+        "Ordner starten mit 777, minus umask 002.",
+        "SGID am Elternordner: neue Einträge erben dessen Gruppe, neue Ordner zusätzlich das SGID-Bit."
+      ],
       "solutions": [
         "lena, web, rwxrwsr-x"
       ],
@@ -533,7 +554,10 @@
         "chmod 644 /home/lena/website/css/style.css"
       ],
       "text": "In Ihrem Home liegt der Ordner `website` mit Unterordnern und Dateien. Entfernen Sie mit **einem** Befehl für others alle Rechte – am Ordner und an allem, was darin liegt.",
-      "hints": [],
+      "hints": [
+        "Rekursiv heißt bei chmod `-R`.",
+        "Symbolisch für others alles weg: `o-rwx`."
+      ],
       "solutions": [
         "chmod -R o-rwx website"
       ],
@@ -572,7 +596,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "Der Ordner `/var/www/shop` **und alles darin** soll künftig `lena` gehören. Die Gruppe bleibt `web`.",
-      "hints": [],
+      "hints": [
+        "Besitzer ändern darf nur root.",
+        "`sudo chown -R BENUTZER ORDNER` – ohne Doppelpunkt bleibt die Gruppe."
+      ],
       "solutions": [
         "sudo chown -R lena /var/www/shop"
       ],
@@ -607,22 +634,16 @@
       "category": "changePermissions",
       "type": "question",
       "text": "max ist Besitzer von `/var/www/shop/config.php`, Mitglied von `web`, aber **nicht** von `kunden`. Er tippt:\n```\nmax@web01:/var/www/shop$ chgrp kunden config.php\n```\nWas passiert?",
-      "choices": [
-        "„Operation not permitted“ – ein Besitzer darf die Gruppe nur auf Gruppen ändern, in denen er selbst Mitglied ist.",
-        "Es klappt, weil max Besitzer der Datei ist.",
-        "Es klappt, aber die Datei verliert alle Gruppenrechte.",
-        "„No such file or directory“, weil max kunden nicht sehen kann."
+      "hints": [
+        "Auf welche Gruppen darf ein normaler Benutzer seine Dateien ändern?",
+        "Nur auf Gruppen, in denen er selbst Mitglied ist."
       ],
-      "hints": [],
       "solutions": [
         "„Operation not permitted“ – ein Besitzer darf die Gruppe nur auf Gruppen ändern, in denen er selbst Mitglied ist."
       ],
       "explanation": "Sonst könnte jeder seine Dateien fremden Gruppen „unterschieben“. root darf jede Gruppe setzen.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "„Operation not permitted“ – ein Besitzer darf die Gruppe nur auf Gruppen ändern, in denen er selbst Mitglied ist."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "max",
@@ -634,7 +655,10 @@
       "category": "changePermissions",
       "type": "question",
       "text": "kim führt `sudo chown jonas: /tmp/bericht.txt` aus (Doppelpunkt am Ende, ohne Gruppe). Welchen Besitzer und welche Gruppe hat die Datei danach? (Antwort: Besitzer, Gruppe)",
-      "hints": [],
+      "hints": [
+        "`chown benutzer:gruppe` – was passiert, wenn nach dem Doppelpunkt nichts steht?",
+        "Leere Gruppe nach dem Doppelpunkt = Primärgruppe des neuen Besitzers."
+      ],
       "solutions": [
         "jonas, jonas"
       ],
@@ -661,7 +685,10 @@
       "scenario": "uebung1",
       "user": "lena",
       "text": "Legen Sie als `lena` das Verzeichnis `/tmp/team` an. Es soll der Gruppe `web` gehören. Mitglieder von web dürfen dort alles (rwx), others gar nichts. Neue Dateien sollen automatisch die Gruppe `web` bekommen, und niemand soll fremde Dateien löschen können. Kein sudo.",
-      "hints": [],
+      "hints": [
+        "Drei Schritte: anlegen, Gruppe ändern, Rechte setzen.",
+        "SGID (2) + Sticky (1) = 3 vorne, dazu 770 → `chmod 3770`."
+      ],
       "solutions": [
         "mkdir /tmp/team",
         "chgrp web /tmp/team",
@@ -692,22 +719,16 @@
       "category": "sgid",
       "type": "question",
       "text": "`/tmp/team` gehört `lena:web` und hat die Rechte `3770`. Wie zeigt `ls -ld /tmp/team` die Rechte an?",
-      "choices": [
-        "drwxrws--T",
-        "drwxrws--t",
-        "drwxrwS--T",
-        "drwxrwx--t"
+      "hints": [
+        "SGID wird bei der Gruppe, Sticky bei others angezeigt.",
+        "Klein = mit x darunter, groß = ohne x. others haben bei 3770 kein x."
       ],
-      "hints": [],
       "solutions": [
         "drwxrws--T"
       ],
       "explanation": "Gruppe hat x → kleines s. others haben kein x → großes T.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "drwxrws--T"
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "lena",
@@ -729,7 +750,10 @@
       "category": "access",
       "type": "question",
       "text": "In `/tmp/team` (`drwxrws--T lena web`) liegt `a.txt` von lena und `b.txt` von max (beide `-rw-rw---- … web`).\nDarf **max** `a.txt` löschen? Darf **lena** `b.txt` löschen? (Antwort: ja/nein, ja/nein)",
-      "hints": [],
+      "hints": [
+        "Sticky-Bit: Wer darf fremde Dateien löschen?",
+        "Nur Datei-Eigentümer, Verzeichnis-Eigentümer oder root. Wem gehört /tmp/team?"
+      ],
       "solutions": [
         "nein, ja"
       ],
@@ -760,22 +784,16 @@
       "category": "access",
       "type": "question",
       "text": "Ausgangslage. Kann **jonas** `/var/www/shop/index.html` lesen? (Die Datei hat `-rw-rw-r--`, others dürfen also lesen.)",
-      "choices": [
-        "Nein – schon /var/www hat für others ---, jonas kommt nicht bis zur Datei.",
-        "Ja – others haben auf index.html r.",
-        "Ja – aber nur mit cat, nicht mit ls.",
-        "Nein – weil shop das SGID-Bit hat."
+      "hints": [
+        "Immer den ganzen Pfad prüfen, nicht nur die Datei.",
+        "Welche Rechte hat jonas auf `/var/www`?"
       ],
-      "hints": [],
       "solutions": [
         "Nein – schon /var/www hat für others ---, jonas kommt nicht bis zur Datei."
       ],
       "explanation": "Die Rechte der Datei helfen nichts, wenn auf dem Weg ein x fehlt.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Nein – schon /var/www hat für others ---, jonas kommt nicht bis zur Datei."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "jonas"
@@ -786,22 +804,16 @@
       "category": "access",
       "type": "question",
       "text": "Ausgangslage. Kann **kim** (ohne sudo) in ihr eigenes Verzeichnis `/var/www/kunden` wechseln?",
-      "choices": [
-        "Nein – kim ist nicht in web, für sie gilt bei /var/www others ---. Dass ihr kunden gehört, nützt nichts.",
-        "Ja – kim ist Besitzerin von kunden.",
-        "Ja – kim ist in der Gruppe sudo.",
-        "Nein – kunden hat für den Besitzer kein x."
+      "hints": [
+        "Ist kim in der Gruppe `web`?",
+        "Ohne x auf `/var/www` kommt man nicht zu `kunden`, auch als Besitzerin."
       ],
-      "hints": [],
       "solutions": [
         "Nein – kim ist nicht in web, für sie gilt bei /var/www others ---. Dass ihr kunden gehört, nützt nichts."
       ],
       "explanation": "Mitglied in sudo zu sein, ändert ohne `sudo` vor dem Befehl nichts an den Rechten.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Nein – kim ist nicht in web, für sie gilt bei /var/www others ---. Dass ihr kunden gehört, nützt nichts."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -812,22 +824,16 @@
       "category": "access",
       "type": "question",
       "text": "Ausgangslage. `config.php` gehört max (`-rw-r----- max web`). lena darf die Datei also nicht ändern. Darf **lena** die Datei **löschen**?",
-      "choices": [
-        "Ja – Löschen hängt von w und x am Verzeichnis ab. shop gibt der Gruppe web rwx, und shop hat kein Sticky-Bit.",
-        "Nein – lena hat auf config.php kein w.",
-        "Nein – nur der Besitzer darf eine Datei löschen.",
-        "Ja – aber nur, weil das SGID-Bit gesetzt ist."
+      "hints": [
+        "Löschen ändert das **Verzeichnis**, nicht die Datei.",
+        "Welche Rechte hat lena (Gruppe web) auf `shop`? Gibt es ein Sticky-Bit?"
       ],
-      "hints": [],
       "solutions": [
         "Ja – Löschen hängt von w und x am Verzeichnis ab. shop gibt der Gruppe web rwx, und shop hat kein Sticky-Bit."
       ],
       "explanation": "Genau dagegen hilft das Sticky-Bit (wie bei /tmp).",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "Ja – Löschen hängt von w und x am Verzeichnis ab. shop gibt der Gruppe web rwx, und shop hat kein Sticky-Bit."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "lena"
@@ -838,7 +844,10 @@
       "category": "access",
       "type": "question",
       "text": "Ausgangslage. Kann **max**:\n(1) `/var/www/logs` auflisten\n(2) in `/var/www/logs` eine Datei anlegen\n(3) `/var/www/logs/access.log` in sein Home kopieren\n(4) `/var/www/kunden/vertrag.txt` lesen\nAntwort z. B. `ja, nein, ja, nein`",
-      "hints": [],
+      "hints": [
+        "Auflisten: r, Anlegen: w+x im Ordner, Kopieren: r auf Quelle + w/x im Ziel.",
+        "Ist max in `kunden`? logs ist `root:web 750`."
+      ],
       "solutions": [
         "ja, nein, ja, nein"
       ],
@@ -857,23 +866,17 @@
       "title": "Teil 7 · Aufgabe 7e",
       "category": "access",
       "type": "question",
-      "text": "Die Aussage „**jonas kann in /tmp keine Dateien anlegen, weil /tmp root gehört**“ ist falsch. Welche Korrektur stimmt?",
-      "choices": [
-        "jonas kann in /tmp Dateien anlegen: others haben rwx (1777). Wem das Verzeichnis gehört, spielt dann keine Rolle.",
-        "jonas kann in /tmp Dateien anlegen, aber nur mit sudo.",
-        "jonas kann in /tmp keine Dateien anlegen, weil das Sticky-Bit das Anlegen verbietet.",
-        "jonas kann in /tmp Dateien anlegen, weil er in der Gruppe root ist."
+      "text": "Die Aussage „**jonas kann in /tmp keine Dateien anlegen, weil /tmp root gehört**“ ist falsch. Korrigieren Sie sie und begründen Sie.",
+      "hints": [
+        "Welche Rechte haben others auf /tmp (1777)?",
+        "Das Sticky-Bit schränkt nur Löschen/Umbenennen fremder Dateien ein, nicht das Anlegen."
       ],
-      "hints": [],
       "solutions": [
         "jonas kann in /tmp Dateien anlegen: others haben rwx (1777). Wem das Verzeichnis gehört, spielt dann keine Rolle."
       ],
       "explanation": "Das Sticky-Bit beschränkt nur Löschen und Umbenennen fremder Dateien, nicht das Anlegen.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "jonas kann in /tmp Dateien anlegen: others haben rwx (1777). Wem das Verzeichnis gehört, spielt dann keine Rolle."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "jonas"
@@ -883,23 +886,17 @@
       "title": "Teil 7 · Aufgabe 7f",
       "category": "access",
       "type": "question",
-      "text": "kim (Gruppen kim, sudo, kunden) soll ohne sudo an `/var/www/kunden` (`kim:kunden`, 770) arbeiten können. `/var/www` gehört `root:web` mit 750. Welche Lösung ist am **sparsamsten**?",
-      "choices": [
-        "/var/www für others durchquerbar machen (o+x): kim erreicht kunden, und shop/logs bleiben für others zu (---).",
-        "kim in die Gruppe web aufnehmen.",
-        "chmod -R 777 /var/www",
-        "kunden nach /tmp verschieben."
+      "text": "kim (Gruppen kim, sudo, kunden) soll ohne sudo an `/var/www/kunden` (`kim:kunden`, 770) arbeiten können. `/var/www` gehört `root:web` mit 750. Beschreiben Sie die **sparsamste** Lösung und begründen Sie sie.",
+      "hints": [
+        "Sparsam = möglichst wenig zusätzlich öffnen.",
+        "Was würde kim als Mitglied von web zusätzlich sehen? Was öffnet o+x auf /var/www wirklich?"
       ],
-      "hints": [],
       "solutions": [
         "/var/www für others durchquerbar machen (o+x): kim erreicht kunden, und shop/logs bleiben für others zu (---)."
       ],
       "explanation": "Mit web hätte kim auch Zugriff auf shop und logs – mehr als nötig. o+x ergänzt ein einziges Recht und öffnet kein weiteres Verzeichnis.",
       "check": {
-        "type": "answer",
-        "accepted": [
-          "/var/www für others durchquerbar machen (o+x): kim erreicht kunden, und shop/logs bleiben für others zu (---)."
-        ]
+        "type": "self"
       },
       "scenario": "uebung1",
       "user": "kim"
@@ -912,7 +909,10 @@
       "scenario": "uebung1",
       "user": "kim",
       "text": "Setzen Sie die Lösung aus 7f als `kim` um und prüfen Sie anschließend, dass Sie (ohne sudo) nach `/var/www/kunden` wechseln können.",
-      "hints": [],
+      "hints": [
+        "/var/www gehört root → sudo nötig.",
+        "`sudo chmod o+x /var/www`, danach `cd /var/www/kunden`."
+      ],
       "solutions": [
         "sudo chmod o+x /var/www",
         "cd /var/www/kunden"

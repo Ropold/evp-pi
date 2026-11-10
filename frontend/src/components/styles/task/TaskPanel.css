@@ -154,3 +154,26 @@
 .task-rating-buttons .button {
     min-width: 96px;
 }
+
+/* Freie Antworten (Erklärungen) mit Selbstvergleich */
+.task-answer-text {
+    width: 100%;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--text-h);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    resize: vertical;
+}
+
+.task-review p {
+    margin: 4px 0 12px;
+}
+
+.task-own-answer {
+    white-space: pre-wrap;
+    padding: 8px 10px;
+    background: var(--code-bg);
+    border-radius: var(--radius);
+}

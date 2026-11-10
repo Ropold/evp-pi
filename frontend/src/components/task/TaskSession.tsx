@@ -13,12 +13,14 @@ type TaskSessionProps = {
     /** Übungsmodus: Aufgabe gelöst und bewertet */
     onRated?: (rating: Rating, helped: boolean) => void;
     /** Prüfungsmodus: Aufgabe abgeschlossen (richtig oder falsch) */
-    onFinished?: (correct: boolean) => void;
+    onFinished?: (correct: boolean, helped: boolean) => void;
     onSkip: () => void;
+    /** Tipp- und Lösungs-Buttons auch im Prüfungsmodus */
+    allowHelp?: boolean;
 };
 
 /** Eine Aufgabe: Aufgaben-Leiste oben, Terminal mit eigener Ausgangslage darunter */
-export default function TaskSession({ task, position, mode, onRated, onFinished, onSkip }: Readonly<TaskSessionProps>) {
+export default function TaskSession({ task, position, mode, onRated, onFinished, onSkip, allowHelp = false }: Readonly<TaskSessionProps>) {
     const [shell, setShell] = useState(() => createTaskState(task));
     const [attempt, setAttempt] = useState(0);
     const [status, setStatus] = useState<TaskStatus>("open");
@@ -35,7 +37,15 @@ export default function TaskSession({ task, position, mode, onRated, onFinished,
         [task],
     );
 
+    const [ownAnswer, setOwnAnswer] = useState("");
+
     const handleAnswer = (answer: string) => {
+        // Freie Erklärung: erst Musterlösung zeigen, dann selbst bewerten
+        if (task.check.type === "self") {
+            setOwnAnswer(answer);
+            setStatus("review");
+            return;
+        }
         if (isAnswerCorrect(task, answer)) {
             setStatus("solved");
         } else if (mode === "exam") {
@@ -66,8 +76,11 @@ export default function TaskSession({ task, position, mode, onRated, onFinished,
                 onRestart={handleRestart}
                 onSkip={onSkip}
                 onAnswer={handleAnswer}
+                ownAnswer={ownAnswer}
+                onSelfAssess={(correct) => setStatus(correct ? "solved" : "failed")}
                 onRate={(rating) => onRated?.(rating, hintLevel > 0 || solutionShown)}
-                onNext={() => onFinished?.(status === "solved")}
+                onNext={() => onFinished?.(status === "solved", hintLevel > 0 || solutionShown)}
+                allowHelp={allowHelp}
             />
             <Terminal key={attempt} state={shell} onCommandExecuted={handleCommand} />
         </div>

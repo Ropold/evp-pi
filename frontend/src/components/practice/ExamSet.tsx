@@ -35,8 +35,8 @@ export default function ExamSet({ set }: Readonly<ExamSetProps>) {
         setStarted(false);
     };
 
-    const finishTask = (correct: boolean) => {
-        setAnswers((previous) => [...previous, { task: tasks[previous.length], correct }]);
+    const finishTask = (correct: boolean, helped = false) => {
+        setAnswers((previous) => [...previous, { task: tasks[previous.length], correct, helped }]);
         window.scrollTo(0, 0);
     };
 
@@ -67,6 +67,7 @@ export default function ExamSet({ set }: Readonly<ExamSetProps>) {
                     task={task}
                     position={`${task.title ?? "Aufgabe"} · ${answers.length + 1} von ${tasks.length}`}
                     mode="exam"
+                    allowHelp
                     onFinished={finishTask}
                     onSkip={() => finishTask(false)}
                 />
@@ -82,7 +83,8 @@ export default function ExamSet({ set }: Readonly<ExamSetProps>) {
                 <p>
                     {tasks.length} Aufgaben in der Reihenfolge des Arbeitsblatts – {terminalCount} davon löst du im Terminal,
                     die übrigen beantwortest du, kannst aber im Terminal (gleicher Server, passender Zustand) nachsehen und
-                    ausprobieren. Keine Tipps, bei Fragen zählt der erste Versuch. Terminal-Aufgaben kannst du überspringen
+                    ausprobieren. Bei Fragen zählt der erste Versuch. Tipps und Lösung kannst du jederzeit aufrufen – die
+                    Aufgabe wird dann in der Auswertung als „mit Hilfe“ markiert. Terminal-Aufgaben kannst du überspringen
                     (zählt als falsch).
                 </p>
                 <p className="task-muted">Quelle: {set.source}</p>

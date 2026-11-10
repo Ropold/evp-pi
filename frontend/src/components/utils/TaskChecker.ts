@@ -64,6 +64,7 @@ function checkState(check: TaskCheckModel, state: ShellStateModel, lastCommand: 
         case "command":
             return new RegExp(check.pattern, "i").test(normalizeCommand(lastCommand));
         case "answer":
+        case "self":
             return false;
         case "all":
             return check.checks.every((part) => checkState(part, state, lastCommand));

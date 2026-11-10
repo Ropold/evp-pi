@@ -5,6 +5,8 @@ import TaskFormattedText from "../task/TaskFormattedText.tsx";
 export type ExamAnswer = {
     task: TaskModel;
     correct: boolean;
+    /** Tipp oder Lösung angesehen (nur Probeklausuren) */
+    helped?: boolean;
 };
 
 type ExamResultProps = {
@@ -16,15 +18,21 @@ type ExamResultProps = {
 export default function ExamResult({ answers, onRestart, restartLabel = "Neue Prüfung" }: Readonly<ExamResultProps>) {
     const correct = answers.filter((answer) => answer.correct).length;
     const percent = answers.length > 0 ? Math.round((correct / answers.length) * 100) : 0;
+    const correctWithHelp = answers.filter((answer) => answer.correct && answer.helped).length;
 
     return (
         <div className="exam-result">
             <p className="exam-score">
                 <strong>{correct}</strong> von {answers.length} richtig ({percent} %)
             </p>
+            {correctWithHelp > 0 && (
+                <p className="task-muted">
+                    Davon {correctWithHelp} mit Tipp oder Lösung – ohne Hilfe: {correct - correctWithHelp} von {answers.length}.
+                </p>
+            )}
 
             <ol className="exam-list">
-                {answers.map(({ task, correct: isCorrect }) => (
+                {answers.map(({ task, correct: isCorrect, helped }) => (
                     <li key={task.id} className={isCorrect ? "exam-correct" : "exam-wrong"}>
                         <span className="exam-mark" aria-label={isCorrect ? "richtig" : "falsch"}>
                             {isCorrect ? "✓" : "✗"}
@@ -33,6 +41,7 @@ export default function ExamResult({ answers, onRestart, restartLabel = "Neue Pr
                             <span className="task-category">
                                 {task.title ? `${task.title} · ` : ""}
                                 {CATEGORY_LABELS[task.category]}
+                                {helped ? " · mit Hilfe" : ""}
                             </span>
                             <div className="exam-text">
                                 <TaskFormattedText text={task.text} />
